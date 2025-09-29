@@ -18,7 +18,6 @@ Sistema de automatización para Comfama desarrollado con tecnologías modernas.
 - **React 18** - Biblioteca de UI
 - **TypeScript** - Superset de JavaScript
 - **TailwindCSS** - Framework de CSS
-- **Vue.js 3** - Framework adicional para componentes específicos
 
 ## 📁 Estructura del Proyecto
 
@@ -96,7 +95,19 @@ cd frontend
 npm install
 ```
 
-3. Ejecutar en modo desarrollo:
+3. Configurar variables de entorno de Firebase:
+
+Crea un archivo .env.local en la raíz de frontend/ con el siguiente contenido (usa tus valores reales de Firebase):
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
+
+4. Ejecutar en modo desarrollo:
 
 ```bash
 npm run dev
@@ -114,7 +125,7 @@ El frontend estará disponible en: http://localhost:3000
 - ✅ Dashboard interactivo para gestión de automatizaciones
 - ✅ API RESTful con documentación automática
 - ✅ Interfaz moderna y responsive
-- ✅ Sistema de autenticación y autorización
+- ✅ Sistema de autenticación y autorización (Firebase Auth)
 - ✅ Monitoreo en tiempo real de procesos
 - ✅ Reportes y analytics
 - ✅ Configuración flexible de automatizaciones

@@ -22,14 +22,14 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-[#800040] text-white px-6 py-4 flex items-center justify-between shadow-md">
+    <header className="bg-[#ee2b7b] text-white px-6 py-4 flex items-center justify-between shadow-md">
       <div className="flex items-center">
         <h1 className="text-2xl font-bold">comfama</h1>
       </div>
       <div className="flex items-center space-x-6">
         <span className="text-lg font-medium">{getSectionName()}</span>
         <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-          <User className="w-5 h-5 text-[#800040]" />
+          <User className="w-5 h-5 text-[#ee2b7b]" />
         </div>
       </div>
     </header>
