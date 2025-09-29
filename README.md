@@ -9,7 +9,7 @@ Sistema de automatización para Comfama desarrollado con tecnologías modernas.
 - **Python 3.11+**
 - **FastAPI** - Framework web moderno y rápido
 - **SQLAlchemy** - ORM para base de datos
-- **PostgreSQL** - Base de datos principal
+- **PostgreSQL** - Base de datos principal 
 - **Alembic** - Migraciones de base de datos
 
 ### Frontend
@@ -18,6 +18,10 @@ Sistema de automatización para Comfama desarrollado con tecnologías modernas.
 - **React 18** - Biblioteca de UI
 - **TypeScript** - Superset de JavaScript
 - **TailwindCSS** - Framework de CSS
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 ## 📁 Estructura del Proyecto
 

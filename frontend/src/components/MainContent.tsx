@@ -16,51 +16,51 @@ const MainContent = () => {
   const cards = [
     {
       id: 1,
-      title: "Gestión de procesos",
+      title: "Proceso 1",
       icon: Settings,
       color: "text-[#6A1B9A]",
       bgColor: "bg-transparent",
-      path: "/tareas",
+      path: "/proceso-1",
     },
     {
       id: 2,
-      title: "Flujos de trabajo",
+      title: "Proceso 2",
       icon: Workflow,
       color: "text-[#00BCD4]",
       bgColor: "bg-transparent",
-      path: "/historial",
+      path: "/proceso-2",
     },
     {
       id: 3,
-      title: "Configuración",
+      title: "Proceso 3",
       icon: Cog,
       color: "text-[#FFC107]",
       bgColor: "bg-transparent",
-      path: "/configuracion",
+      path: "/proceso-3",
     },
     {
       id: 4,
-      title: "Reportes",
+      title: "Proceso 4",
       icon: FileText,
       color: "text-[#B71C1C]",
       bgColor: "bg-transparent",
-      path: "/historial",
+      path: "/proceso-4",
     },
     {
       id: 5,
-      title: "Usuarios",
+      title: "Proceso 5",
       icon: Users,
       color: "text-[#2196F3]",
       bgColor: "bg-transparent",
-      path: "/tareas",
+      path: "/proceso-5",
     },
     {
       id: 6,
-      title: "Tareas",
+      title: "Proceso 6",
       icon: CheckSquare,
       color: "text-[#4CAF50]",
       bgColor: "bg-transparent",
-      path: "/tareas",
+      path: "/proceso-6",
     },
   ];
 
@@ -75,7 +75,7 @@ const MainContent = () => {
           Automatización de procesos
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {cards.map((card) => {
             const IconComponent = card.icon;
             return (

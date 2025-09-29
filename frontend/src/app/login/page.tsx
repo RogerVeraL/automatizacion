@@ -1,10 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { signInWithPopup, signInWithEmailAndPassword, OAuthProvider } from "firebase/auth";
+import {
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  OAuthProvider,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-
+import Image from "next/image";
+import Logo from "../../images/comfama_logo.png";
 const Login = () => {
   const router = useRouter();
   const [authing, setAuthing] = useState(false);
@@ -47,13 +52,15 @@ const Login = () => {
   return (
     <div className="w-full h-screen flex">
       <div className="w-1/2 h-full flex items-center justify-center bg-white">
-        <h1 className="text-6xl font-bold text-[#ee2b7b]">COMFAMA</h1>
+        <Image src={Logo} alt="Logo" width={450} height={100} />
       </div>
 
       <div className="w-1/2 h-full bg-white flex flex-col p-20 justify-center">
-        <div className="w-full max-w-[450px] mx-auto bg-white rounded-xl shadow-lg shadow-[#ee2b7b]/50 p-10">
+        <div className="w-full max-w-[450px] mx-auto bg-white rounded-xl p-10">
           <div className="w-full flex flex-col mb-10 text-[#ee2b7b]">
-            <h3 className="text-4xl font-bold mb-2 text-center">Iniciar sesión</h3>
+            <h3 className="text-4xl font-bold mb-2 text-center">
+              Iniciar sesión
+            </h3>
           </div>
 
           <div className="w-full flex flex-col mb-6">
@@ -74,15 +81,16 @@ const Login = () => {
           </div>
 
           <button
-            className="w-full bg-[#ee2b7b] text-white font-semibold rounded-md p-4 cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200
-"
+            className="w-full bg-[#ee2b7b] text-white font-semibold rounded-md p-4 cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200"
             onClick={signInWithEmail}
             disabled={authing}
           >
             Log In With Email
           </button>
 
-          {error && <div className="text-red-500 my-4 text-center">{error}</div>}
+          {error && (
+            <div className="text-red-500 my-4 text-center">{error}</div>
+          )}
 
           <div className="w-full flex items-center justify-center my-6">
             <div className="flex-grow h-[1px] bg-gray-300" />
@@ -91,8 +99,7 @@ const Login = () => {
           </div>
 
           <button
-            className="w-full bg-[#006FC9] text-white font-semibold rounded-md p-4 cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200
-"
+            className="w-full bg-[#006FC9] text-white font-semibold rounded-md p-4 cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200"
             onClick={signInWithMicrosoft}
             disabled={authing}
           >
@@ -102,7 +109,6 @@ const Login = () => {
       </div>
     </div>
   );
-
 };
 
 export default Login;
