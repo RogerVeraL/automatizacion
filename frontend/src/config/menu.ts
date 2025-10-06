@@ -13,7 +13,7 @@ export interface ProcessItem {
 // Menú principal
 export const menuItems: MenuItem[] = [
   { id: "Home", label: "Home", path: "/" },
-  { id: "Pendientes", label: "Pendientes", path: "/pendiente-1" },
+  { id: "Pendientes", label: "Pendientes", path: "/pendientes" },
 ];
 
 // Procesos de automatización

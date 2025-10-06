@@ -2,7 +2,7 @@ import { lazy } from "react";
 
 // Lazy loading de componentes de procesos
 export const processRoutes = {
-  "pendientes": lazy(() => import("../components/processes/Pendientes")),
+  pendientes: lazy(() => import("../components/processes/Pendientes")),
   "proceso-1": lazy(() => import("../components/processes/Proceso1")),
   "proceso-2": lazy(() => import("../components/processes/Proceso2")),
   "proceso-3": lazy(() => import("../components/processes/Proceso3")),
