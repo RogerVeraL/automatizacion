@@ -1,27 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { menuItems, processItems } from "../config/menu";
+import { useNavigation } from "../hooks/useNavigation";
 
 const Sidebar = () => {
   const router = useRouter();
-  const pathname = usePathname();
+  const { isActive, isSubmenuActive } = useNavigation();
   const [isAutomatizacionesOpen, setIsAutomatizacionesOpen] = useState(false);
-
-  const menuItems = [
-    { id: "Home", label: "Home", path: "/" },
-    { id: "Pendientes", label: "Pendientes", path: "/pendiente-1" },
-  ];
-
-  const automatizacionesItems = [
-    { id: "Proceso1", label: "Proceso 1", path: "/proceso-1" },
-    { id: "Proceso2", label: "Proceso 2", path: "/proceso-2" },
-    { id: "Proceso3", label: "Proceso 3", path: "/proceso-3" },
-    { id: "Proceso4", label: "Proceso 4", path: "/proceso-4" },
-    { id: "Proceso5", label: "Proceso 5", path: "/proceso-5" },
-    { id: "Proceso6", label: "Proceso 6", path: "/proceso-6" },
-  ];
 
   const handleItemClick = (path: string) => {
     router.push(path);
@@ -31,23 +19,12 @@ const Sidebar = () => {
     setIsAutomatizacionesOpen(!isAutomatizacionesOpen);
   };
 
-  const isActive = (path: string) => {
-    if (path === "/") {
-      return pathname === "/";
-    }
-    return pathname.startsWith(path);
-  };
-
-  const isAutomatizacionActive = () => {
-    return automatizacionesItems.some((item) => isActive(item.path));
-  };
-
   // Mantener abierto el submenú cuando haya una automatización activa
   useEffect(() => {
-    if (isAutomatizacionActive()) {
+    if (isSubmenuActive(processItems)) {
       setIsAutomatizacionesOpen(true);
     }
-  }, [pathname]);
+  }, [isSubmenuActive]);
 
   return (
     <aside className="w-64 bg-white shadow-lg min-h-screen border-r border-gray-200">
@@ -73,7 +50,7 @@ const Sidebar = () => {
             <button
               onClick={handleAutomatizacionesToggle}
               className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-between ${
-                isAutomatizacionActive()
+                isSubmenuActive(processItems)
                   ? "bg-gray-100 text-gray-900 font-bold"
                   : "text-gray-700 hover:bg-gray-50"
               }`}
@@ -88,7 +65,7 @@ const Sidebar = () => {
 
             {isAutomatizacionesOpen && (
               <ul className="ml-4 mt-2 space-y-1">
-                {automatizacionesItems.map((item) => (
+                {processItems.map((item) => (
                   <li key={item.id}>
                     <button
                       onClick={() => handleItemClick(item.path)}

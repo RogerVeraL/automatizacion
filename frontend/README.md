@@ -1,129 +1,167 @@
-# Frontend - Comfama Automatización
+# 🚀 Comfama - Automatización de Procesos
 
-Este es el frontend del sistema de automatización para Comfama, desarrollado con Next.js, React, TypeScript y TailwindCSS.
+Sistema de automatización de procesos para Comfama con Next.js 14, TypeScript y TailwindCSS.
 
-## Características
-
-- ⚡ Next.js 14 con App Router
-- 🎨 TailwindCSS para estilos
-- 📱 Diseño responsive
-- 🔧 TypeScript para type safety
-- 🎯 Componentes reutilizables
-- 📊 Dashboard interactivo
-- 🚀 Despliegue automático en Vercel
-
-## Instalación
-
-1. Instalar dependencias:
-
-```bash
-npm i
-```
-
-2. Configurar variables de entorno:
-
-```bash
-cp env.local.example .env.local
-```
-
-3. Configurar variables de entorno de Firebase:
-
-Crea un archivo .env.local en la raíz de frontend/ con el siguiente contenido (usa tus valores reales de Firebase):
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-```
-
-4. Ejecutar en modo desarrollo:
-
-```bash
-npm run dev
-```
-
-4. Abrir [http://localhost:3000](http://localhost:3000) en el navegador
-
-## Scripts Disponibles
-
-- `npm run dev` - Ejecutar en modo desarrollo
-- `npm run build` - Construir para producción
-- `npm run start` - Ejecutar en modo producción
-- `npm run lint` - Ejecutar linter
-- `npm run lint:fix` - Corregir errores de linting automáticamente
-- `npm run type-check` - Verificar tipos de TypeScript
-- `npm run vercel-build` - Build específico para Vercel
-
-## Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```
 frontend/
 ├── src/
-│   ├── app/                 # App Router de Next.js
-│   │   ├── globals.css      # Estilos globales
-│   │   ├── layout.tsx       # Layout principal
-│   │   └── page.tsx         # Página principal
-│   ├── components/          # Componentes React
-│   │   ├── Header.tsx      # Header de la aplicación
-│   │   ├── Sidebar.tsx      # Sidebar de navegación
-│   │   └── AutomationDashboard.tsx # Dashboard principal
-│   └── lib/                 # Utilidades y helpers
-├── public/                  # Archivos estáticos
-├── package.json            # Dependencias
-├── tailwind.config.js      # Configuración de Tailwind
-├── tsconfig.json           # Configuración de TypeScript
-└── next.config.js          # Configuración de Next.js
+│   ├── app/                          # Next.js App Router
+│   │   ├── layout.tsx                # Layout principal de la aplicación
+│   │   ├── page.tsx                  # Página home (Dashboard)
+│   │   ├── [slug]/                   # Rutas dinámicas
+│   │   │   └── page.tsx              # Página dinámica para procesos
+│   │   ├── routes.ts                 # Sistema de rutas con lazy loading
+│   │   ├── columns.tsx               # Configuración de columnas para DataTable
+│   │   └── users.ts                  # Datos mock de usuarios
+│   ├── components/
+│   │   ├── ui/                       # Componentes UI base (shadcn/ui)
+│   │   │   ├── button.tsx
+│   │   │   ├── datatable.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── table.tsx
+│   │   │   └── ...
+│   │   ├── processes/                # Componentes de cada proceso
+│   │   │   ├── Pendientes.tsx        # Gestión de tareas pendientes
+│   │   │   ├── Proceso1.tsx          # DataTable con usuarios
+│   │   │   ├── Proceso2.tsx          # En construcción
+│   │   │   ├── Proceso3.tsx          # En construcción
+│   │   │   ├── Proceso4.tsx          # En construcción
+│   │   │   ├── Proceso5.tsx          # En construcción
+│   │   │   └── Proceso6.tsx          # En construcción
+│   │   ├── Header.tsx                # Header con navegación
+│   │   ├── Sidebar.tsx               # Sidebar con menú
+│   │   ├── MainContent.tsx           # Dashboard principal
+│   │   └── TodoList.tsx              # Componente de tareas
+│   ├── config/
+│   │   └── menu.ts                   # Configuración centralizada de menús
+│   ├── hooks/
+│   │   └── useNavigation.ts          # Hook para lógica de navegación
+│   ├── lib/
+│   │   └── utils.ts                  # Utilidades (cn function)
+│   └── images/
+│       └── comfama_logo.png          # Logo de Comfama
+├── public/                           # Archivos estáticos
+├── package.json                      # Dependencias del proyecto
+├── tailwind.config.js                # Configuración de TailwindCSS
+├── tsconfig.json                     # Configuración de TypeScript
+└── next.config.js                    # Configuración de Next.js
 ```
 
-## Tecnologías Utilizadas
+## 🏗️ Arquitectura
 
-- **Next.js 14** - Framework de React
-- **React 18** - Biblioteca de UI
-- **TypeScript** - Superset de JavaScript
+### **Sistema de Rutas Dinámicas**
+
+- **Lazy Loading**: Componentes se cargan solo cuando se necesitan
+- **Suspense**: Loading states durante la carga
+- **Validación**: Procesos no válidos muestran error 404
+
+### **Configuración Centralizada**
+
+- **Menús**: Configuración en `config/menu.ts`
+- **Navegación**: Lógica reutilizable en `hooks/useNavigation.ts`
+- **Metadatos**: Títulos y descripciones en `app/routes.ts`
+
+### **Componentes Modulares**
+
+- **Procesos**: Cada proceso en su archivo separado
+- **UI**: Componentes base reutilizables
+- **Layout**: Header y Sidebar consistentes
+
+## 🚀 Funcionalidades
+
+### **Dashboard (`/`)**
+
+- Grid de procesos disponibles
+- Navegación a procesos individuales
+- Diseño responsive
+
+### **Pendientes (`/pendientes`)**
+
+- Gestión de tareas con TodoList
+- Persistencia en localStorage
+- Agregar, completar, eliminar tareas
+- Contador de tareas pendientes
+
+### **Proceso 1 (`/proceso-1`)**
+
+- DataTable con usuarios
+- Filtro global por nombre
+- Ordenamiento y paginación
+- Búsqueda en tiempo real
+
+### **Procesos 2-6 (`/proceso-2` a `/proceso-6`)**
+
+- Páginas "en construcción"
+- Listos para desarrollo futuro
+- Estructura preparada para escalabilidad
+
+## 🛠️ Tecnologías
+
+- **Next.js 14** - Framework de React con App Router
+- **TypeScript** - Tipado estático
 - **TailwindCSS** - Framework de CSS
+- **shadcn/ui** - Componentes UI
+- **TanStack Table** - Tablas avanzadas
 - **Lucide React** - Iconos
-- **Axios** - Cliente HTTP
 
-## Despliegue en Vercel
-
-### Configuración Automática
-
-1. Conecta tu repositorio a Vercel
-2. Vercel detectará automáticamente que es un proyecto Next.js
-3. Configura las variables de entorno en el dashboard de Vercel
-
-### Variables de Entorno Requeridas
+## 📦 Instalación
 
 ```bash
-NEXT_PUBLIC_API_URL=https://your-firebase-functions-url.com
-NEXT_PUBLIC_APP_NAME=Comfama Automatización
-NEXT_PUBLIC_APP_VERSION=1.0.0
+# Instalar dependencias
+npm install
+
+# Ejecutar en desarrollo
+npm run dev
+
+# Construir para producción
+npm run build
+
+# Ejecutar en producción
+npm start
 ```
 
-### Despliegue Manual
+## 🔧 Scripts Disponibles
 
 ```bash
-# Instalar Vercel CLI
-npm i -g vercel
-
-# Desplegar
-vercel
-
-# Desplegar a producción
-vercel --prod
+npm run dev          # Desarrollo
+npm run build        # Construcción
+npm run start        # Producción
+npm run lint         # Linting
+npm run lint:fix     # Linting con corrección automática
+npm run type-check   # Verificación de tipos
 ```
 
-### Configuración de Dominio
+## 📋 Próximos Pasos
 
-1. Ve a tu proyecto en Vercel Dashboard
-2. Ve a Settings > Domains
-3. Agrega tu dominio personalizado
-4. Configura los registros DNS según las instrucciones
+- [ ] Implementar Proceso 2
+- [ ] Implementar Proceso 3
+- [ ] Implementar Proceso 4
+- [ ] Implementar Proceso 5
+- [ ] Implementar Proceso 6
+- [ ] Agregar testing (Jest + Testing Library)
+- [ ] Implementar Storybook
+- [ ] Agregar CI/CD
 
-### Monitoreo y Analytics
+## 🤝 Contribución
 
-- **Vercel Analytics**: Habilitado automáticamente
-- **Core Web Vitals**: Monitoreo de rendimiento
-- **Deploy Previews**: Preview automático en cada PR
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+
+## 👥 Equipo
+
+- **Desarrollo Frontend**: [Tu nombre]
+- **Diseño UI/UX**: [Diseñador]
+- **Product Owner**: [PO]
+
+---
+
+**Comfama** - Automatización de Procesos 🚀

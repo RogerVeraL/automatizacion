@@ -1,46 +1,17 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
 import Image from "next/image";
 import Logo from "../images/comfama_logo.png";
+import { useNavigation } from "../hooks/useNavigation";
 
 const Header = () => {
-  const pathname = usePathname();
   const router = useRouter();
+  const { getSectionName } = useNavigation();
 
   const handleLogoClick = () => {
     router.push("/");
-  };
-
-  const getSectionName = () => {
-    // Rutas dinámicas para procesos
-    if (pathname.startsWith("/proceso-")) {
-      return pathname
-        .substring(1) // Remover el slash inicial
-        .replace(/-/g, " ")
-        .replace(/\b\w/g, (c) => c.toUpperCase());
-    }
-
-    // Rutas dinámicas para pendientes
-    if (pathname.startsWith("/pendiente-")) {
-      return "Pendientes";
-    }
-
-    switch (pathname) {
-      case "/":
-        return "Dashboard";
-      case "/tareas":
-        return "Tareas";
-      case "/pendientes":
-        return "Pendientes";
-      case "/historial":
-        return "Historial";
-      case "/configuracion":
-        return "Configuración";
-      default:
-        return "Dashboard";
-    }
   };
 
   return (

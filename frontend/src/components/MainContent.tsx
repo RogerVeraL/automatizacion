@@ -9,60 +9,20 @@ import {
   Users,
   CheckSquare,
 } from "lucide-react";
+import { dashboardProcesses } from "../config/menu";
 
 const MainContent = () => {
   const router = useRouter();
 
-  const cards = [
-    {
-      id: 1,
-      title: "Proceso 1",
-      icon: Settings,
-      color: "text-[#6A1B9A]",
-      bgColor: "bg-transparent",
-      path: "/proceso-1",
-    },
-    {
-      id: 2,
-      title: "Proceso 2",
-      icon: Workflow,
-      color: "text-[#00BCD4]",
-      bgColor: "bg-transparent",
-      path: "/proceso-2",
-    },
-    {
-      id: 3,
-      title: "Proceso 3",
-      icon: Cog,
-      color: "text-[#FFC107]",
-      bgColor: "bg-transparent",
-      path: "/proceso-3",
-    },
-    {
-      id: 4,
-      title: "Proceso 4",
-      icon: FileText,
-      color: "text-[#B71C1C]",
-      bgColor: "bg-transparent",
-      path: "/proceso-4",
-    },
-    {
-      id: 5,
-      title: "Proceso 5",
-      icon: Users,
-      color: "text-[#2196F3]",
-      bgColor: "bg-transparent",
-      path: "/proceso-5",
-    },
-    {
-      id: 6,
-      title: "Proceso 6",
-      icon: CheckSquare,
-      color: "text-[#4CAF50]",
-      bgColor: "bg-transparent",
-      path: "/proceso-6",
-    },
-  ];
+  // Mapeo de iconos
+  const iconMap = {
+    Settings,
+    Workflow,
+    Cog,
+    FileText,
+    Users,
+    CheckSquare,
+  };
 
   const handleCardClick = (path: string) => {
     router.push(path);
@@ -76,8 +36,8 @@ const MainContent = () => {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {cards.map((card) => {
-            const IconComponent = card.icon;
+          {dashboardProcesses.map((card) => {
+            const IconComponent = iconMap[card.icon as keyof typeof iconMap];
             return (
               <div
                 key={card.id}
