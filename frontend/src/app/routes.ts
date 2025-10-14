@@ -3,8 +3,10 @@ import { lazy } from "react";
 // Lazy loading de componentes de procesos
 export const processRoutes = {
   pendientes: lazy(() => import("../components/processes/Pendientes")),
-  "proceso-1": lazy(() => import("../components/processes/Proceso1")),
-  "proceso-2": lazy(() => import("../components/processes/Proceso2")),
+  "indicador-de-equipos": lazy(
+    () => import("../components/processes/Indicador de Equipos")
+  ),
+  "Cruce CMDB": lazy(() => import("../components/processes/Crucecmbd")),
   "proceso-3": lazy(() => import("../components/processes/Proceso3")),
   "proceso-4": lazy(() => import("../components/processes/Proceso4")),
   "proceso-5": lazy(() => import("../components/processes/Proceso5")),
@@ -17,14 +19,14 @@ export const processMetadata = {
     title: "Pendientes",
     description: "Gestión de tareas pendientes",
   },
-  "proceso-1": {
-    title: "Proceso 1",
-    description: "Descripción del proceso 1",
+  "indicador-de-equipos": {
+    title: "Indicador de Equipos",
+    description: "Indicador de Equipos",
     showDataTable: true,
     globalFilterColumn: "name",
   },
-  "proceso-2": {
-    title: "Proceso 2",
+  "Cruce CMDB": {
+    title: "Cruce CMDB",
     description: "Descripción del proceso 2",
   },
   "proceso-3": {

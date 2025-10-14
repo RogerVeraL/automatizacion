@@ -18,8 +18,12 @@ export const menuItems: MenuItem[] = [
 
 // Procesos de automatización
 export const processItems: ProcessItem[] = [
-  { id: "Proceso1", label: "Proceso 1", path: "/proceso-1" },
-  { id: "Proceso2", label: "Proceso 2", path: "/proceso-2" },
+  {
+    id: "Indicador de Equipos",
+    label: "Indicador Equipos",
+    path: "/indicador-de-equipos",
+  },
+  { id: "Cruce CMDB", label: "Cruce CMDB", path: "/Cruce-CMDB" },
   { id: "Proceso3", label: "Proceso 3", path: "/proceso-3" },
   { id: "Proceso4", label: "Proceso 4", path: "/proceso-4" },
   { id: "Proceso5", label: "Proceso 5", path: "/proceso-5" },
@@ -30,11 +34,11 @@ export const processItems: ProcessItem[] = [
 export const dashboardProcesses = [
   {
     id: 1,
-    title: "Proceso 1",
+    title: "Indicador Equipos",
     icon: "Settings",
     color: "text-[#6A1B9A]",
     bgColor: "bg-transparent",
-    path: "/proceso-1",
+    path: "/indicador-de-equipos",
   },
   {
     id: 2,
@@ -42,7 +46,7 @@ export const dashboardProcesses = [
     icon: "Workflow",
     color: "text-[#00BCD4]",
     bgColor: "bg-transparent",
-    path: "/proceso-2",
+    path: "/Cruce CMDB",
   },
   {
     id: 3,

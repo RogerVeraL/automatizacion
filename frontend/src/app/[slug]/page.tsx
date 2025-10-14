@@ -47,7 +47,7 @@ export default async function DynamicPage({ params }: PageProps) {
         <div className="flex">
           <Sidebar />
           <main className="flex-1 bg-white p-8 min-h-screen">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-xl mx-auto">
               <h1 className="text-3xl font-bold text-black mb-6">{title}</h1>
               <InvalidProcess title={title} />
             </div>
@@ -70,7 +70,7 @@ export default async function DynamicPage({ params }: PageProps) {
       <div className="flex">
         <Sidebar />
         <main className="flex-1 bg-white p-8 min-h-screen">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-[77vw] mx-auto">
             <h1 className="text-3xl font-bold text-black mb-6">{title}</h1>
             <Suspense fallback={<LoadingSpinner />}>
               <ProcessComponent />
