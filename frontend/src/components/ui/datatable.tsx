@@ -26,6 +26,7 @@ interface DataTableProps<TData, TValue> {
   columns: any[];
   caption?: string;
   globalFilterColumn?: string;
+  searchButton?: React.ReactNode;
 }
 
 export default function DataTable<TData, TValue>({
@@ -33,6 +34,7 @@ export default function DataTable<TData, TValue>({
   columns,
   caption,
   globalFilterColumn,
+  searchButton,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<any>([]);
   const [columnFilters, setColumnFilters] = useState<any>([]);
@@ -82,24 +84,30 @@ export default function DataTable<TData, TValue>({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col">
       {globalFilterColumn && (
-        <Input
-          placeholder="Buscar..."
-          value={
-            (table.getColumn(globalFilterColumn)?.getFilterValue() as string) ??
-            ""
-          }
-          onChange={(e) =>
-            table.getColumn(globalFilterColumn)?.setFilterValue(e.target.value)
-          }
-          className="max-w-sm"
-        />
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Buscar..."
+            value={
+              (table
+                .getColumn(globalFilterColumn)
+                ?.getFilterValue() as string) ?? ""
+            }
+            onChange={(e) =>
+              table
+                .getColumn(globalFilterColumn)
+                ?.setFilterValue(e.target.value)
+            }
+            className="max-w-sm"
+          />
+          {searchButton}
+        </div>
       )}
-      <div className="rounded-md border">
+      <div className="rounded-md border flex-1 min-h-0">
         <div
           ref={tableContainerRef}
-          className="max-h-[70vh] overflow-y-auto overflow-x-hidden"
+          className="h-full overflow-y-auto overflow-x-hidden"
         >
           <Table ref={tableRef} className="min-w-[1600px]">
             {caption && <TableCaption>{caption}</TableCaption>}
