@@ -45,7 +45,10 @@ const MainContent = () => {
                 className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-105 hover:border-gray-300"
               >
                 <div className="mb-4">
-                  <IconComponent className={`w-16 h-16 ${card.color}`} />
+                  <IconComponent
+                    className="w-16 h-16"
+                    style={{ color: card.color }}
+                  />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">
                   {card.title}
