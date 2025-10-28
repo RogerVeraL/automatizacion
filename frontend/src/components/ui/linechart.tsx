@@ -54,8 +54,8 @@ export default function EquipmentChart({ users }: LineChartProps) {
   return (
     <LineChart
       style={{
-        width: "80%",
-        height: "100%",
+        width: "40%",
+        height: "50vh",
         aspectRatio: 1.618,
       }}
       responsive
