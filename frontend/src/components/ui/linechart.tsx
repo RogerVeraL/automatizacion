@@ -15,15 +15,7 @@ interface LineChartProps {
 export default function EquipmentChart({ users }: LineChartProps) {
   // Calcular datos del gráfico basado en los usuarios
   const calculateChartData = () => {
-    const months = [
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-    ];
+    const months = ["Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep"];
 
     return months.map((month) => {
       // Filtrar usuarios por mes (simulando distribución)
@@ -54,8 +46,8 @@ export default function EquipmentChart({ users }: LineChartProps) {
   return (
     <LineChart
       style={{
-        width: "40%",
-        height: "50vh",
+        width: "100%",
+        height: "100%",
         aspectRatio: 1.618,
       }}
       responsive

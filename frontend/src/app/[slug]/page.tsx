@@ -1,4 +1,6 @@
-import { Suspense } from "react";
+"use client";
+
+import { Suspense, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import TodoList from "../../components/TodoList";
@@ -33,8 +35,10 @@ const InvalidProcess = ({ title }: { title: string }) => (
   </div>
 );
 
-export default async function DynamicPage({ params }: PageProps) {
+export default function DynamicPage({ params }: PageProps) {
   const { slug } = params;
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const handleToggleSidebar = () => setIsSidebarOpen((v) => !v);
 
   // Verificar si es un proceso válido
   if (!isValidProcess(slug)) {
@@ -45,7 +49,7 @@ export default async function DynamicPage({ params }: PageProps) {
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="flex">
-          <Sidebar />
+          <Sidebar collapsed={!isSidebarOpen} onToggle={handleToggleSidebar} />
           <main className="flex-1 bg-white p-8 min-h-screen">
             <div className="max-w-xl mx-auto">
               <h1 className="text-3xl font-bold text-black mb-6">{title}</h1>
@@ -68,7 +72,7 @@ export default async function DynamicPage({ params }: PageProps) {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="flex">
-        <Sidebar />
+        <Sidebar collapsed={!isSidebarOpen} onToggle={handleToggleSidebar} />
         <main className="flex-1 bg-white p-8 min-h-screen">
           <div className="max-w-[77vw] mx-auto">
             <h1 className="text-3xl font-bold text-black mb-6">{title}</h1>

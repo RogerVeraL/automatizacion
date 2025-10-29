@@ -13,12 +13,17 @@ export interface ProcessItem {
 // Menú principal
 export const menuItems: MenuItem[] = [
   { id: "Home", label: "Home", path: "/" },
+  { id: "Dashboard", label: "Dashboard", path: "/dashboard" },
   { id: "Pendientes", label: "Pendientes", path: "/pendientes" },
 ];
 
 // Procesos de automatización
 export const processItems: ProcessItem[] = [
-  {id: "Indicador de Equipos", label: "Indicador Equipos", path: "/indicador-de-equipos" },
+  {
+    id: "Indicador de Equipos",
+    label: "Indicador Equipos",
+    path: "/indicador-de-equipos",
+  },
   { id: "Cruce CMDB", label: "Cruce CMDB", path: "/Cruce-CMDB" },
   { id: "Proceso3", label: "Proceso 3", path: "/proceso-3" },
   { id: "Proceso4", label: "Proceso 4", path: "/proceso-4" },

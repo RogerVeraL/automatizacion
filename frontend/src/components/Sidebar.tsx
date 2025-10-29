@@ -1,12 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronRight } from "lucide-react";
 import { menuItems, processItems } from "../config/menu";
 import { useNavigation } from "../hooks/useNavigation";
 
-const Sidebar = () => {
+type SidebarProps = {
+  collapsed?: boolean;
+  onToggle?: () => void;
+};
+
+const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
   const router = useRouter();
   const { isActive, isSubmenuActive } = useNavigation();
   const [isAutomatizacionesOpen, setIsAutomatizacionesOpen] = useState(false);
@@ -27,8 +32,38 @@ const Sidebar = () => {
   }, [isSubmenuActive]);
 
   return (
-    <aside className="w-64 bg-white shadow-lg min-h-screen border-r border-gray-200">
-      <nav className="p-6">
+    <aside
+      className={`sticky top-0 self-start bg-white shadow-lg h-screen border-r border-gray-200 transition-all duration-300 overflow-x-hidden overflow-y-auto ${
+        collapsed ? "w-8" : "w-64"
+      }`}
+      aria-hidden={false}
+    >
+      {/* Toggle button centered */}
+      {onToggle && (
+        <button
+          aria-label={
+            collapsed ? "Abrir barra lateral" : "Cerrar barra lateral"
+          }
+          onClick={onToggle}
+          className={`absolute top-1/2 -translate-y-1/2 right-1 z-10 p-1.5 rounded-md border transition-colors ${
+            collapsed
+              ? "bg-white hover:bg-gray-50 border-gray-200"
+              : "bg-white hover:bg-gray-50 border-gray-200"
+          }`}
+        >
+          {collapsed ? (
+            <ChevronRight className="w-4 h-4 text-gray-700" />
+          ) : (
+            <ChevronLeft className="w-4 h-4 text-gray-700" />
+          )}
+        </button>
+      )}
+
+      <nav
+        className={`p-6 transition-opacity duration-200 ${
+          collapsed ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
+      >
         <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.id}>

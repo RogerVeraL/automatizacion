@@ -43,11 +43,7 @@ const nextConfig = {
   // Configuración de redirecciones para Vercel
   async redirects() {
     return [
-      {
-        source: "/dashboard",
-        destination: "/",
-        permanent: true,
-      },
+      // Redirecciones personalizadas aquí si las necesitas
     ];
   },
 };

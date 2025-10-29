@@ -8,6 +8,8 @@ export const useNavigation = () => {
 
   // Obtener el nombre de la sección actual
   const getSectionName = () => {
+    if (!pathname) return "Dashboard";
+
     // Rutas dinámicas para procesos
     if (pathname.startsWith("/proceso-")) {
       return pathname
@@ -23,7 +25,15 @@ export const useNavigation = () => {
 
     switch (pathname) {
       case "/":
+        return "Home";
+      case "/dashboard":
         return "Dashboard";
+      case "/pendientes":
+        return "Pendientes";
+      case "/indicador-de-equipos":
+        return "Indicador de Equipos";
+      case "/Cruce-CMDB":
+        return "Cruce CMDB";
       default:
         return "Dashboard";
     }
@@ -31,6 +41,7 @@ export const useNavigation = () => {
 
   // Verificar si una ruta está activa
   const isActive = (path: string): boolean => {
+    if (!pathname) return false;
     if (path === "/") {
       return pathname === "/";
     }

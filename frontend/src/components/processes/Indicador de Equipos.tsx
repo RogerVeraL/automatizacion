@@ -504,14 +504,6 @@ const Proceso1 = () => {
         </div>
       </div>
 
-      {/* Gráfico de líneas*/}
-      <div className="w-[70vw] rounded-md border p-4 mt-8">
-        <h2 className="text-2xl font-bold mb-4">Equipos Entregados</h2>
-        <div className="h-90 flex justify-center">
-          <LineChart users={users} />
-        </div>
-      </div>
-
       {/* Modal para adjuntar archivos Excel */}
       {showExcelModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

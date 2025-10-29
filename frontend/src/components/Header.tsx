@@ -6,7 +6,9 @@ import Image from "next/image";
 import Logo from "../images/comfama_logo.png";
 import { useNavigation } from "../hooks/useNavigation";
 
-const Header = () => {
+type HeaderProps = {};
+
+const Header = ({}: HeaderProps) => {
   const router = useRouter();
   const { getSectionName } = useNavigation();
 
@@ -16,7 +18,7 @@ const Header = () => {
 
   return (
     <header className="bg-[#ffffff] px-6 py-4 flex items-center justify-between shadow-md border-b border">
-      <div className="flex items-center">
+      <div className="flex items-center gap-3">
         <button
           onClick={handleLogoClick}
           className="cursor-pointer hover:scale-105 transition-transform duration-200 rounded-lg "
