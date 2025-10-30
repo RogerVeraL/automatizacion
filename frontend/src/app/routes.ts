@@ -2,7 +2,7 @@ import { lazy } from "react";
 
 // Lazy loading de componentes de procesos
 export const processRoutes = {
-  pendientes: lazy(() => import("../components/processes/Pendientes")),
+  tareas: lazy(() => import("../components/processes/Pendientes")),
   "indicador-de-equipos": lazy(
     () => import("../components/processes/Indicador de Equipos")
   ),
@@ -13,11 +13,11 @@ export const processRoutes = {
   "proceso-6": lazy(() => import("../components/processes/Proceso6")),
 } as const;
 
-// Configuración de metadatos para cada proceso
+// Configuración de metadatos para cada Proceso
 export const processMetadata = {
-  pendientes: {
-    title: "Pendientes",
-    description: "Gestión de tareas pendientes",
+  tareas: {
+    title: "Tareas",
+    description: "Gestión de tareas",
   },
   "indicador-de-equipos": {
     title: "Indicador de Equipos",

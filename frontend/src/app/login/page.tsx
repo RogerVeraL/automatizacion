@@ -9,7 +9,7 @@ import {
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import Image from "next/image";
-import Logo from "../../images/comfama_logo.png";
+import Logo from "../../images/Comfama_logo.svg";
 const Login = () => {
   const router = useRouter();
   const [authing, setAuthing] = useState(false);
@@ -57,7 +57,7 @@ const Login = () => {
 
       <div className="w-1/2 h-full bg-white flex flex-col p-20 justify-center">
         <div className="w-full max-w-[450px] mx-auto bg-white rounded-xl p-10">
-          <div className="w-full flex flex-col mb-10 text-[#ee2b7b]">
+          <div className="w-full flex flex-col mb-10 text-[#FF277E]">
             <h3 className="text-4xl font-bold mb-2 text-center">
               Iniciar sesión
             </h3>
@@ -67,21 +67,21 @@ const Login = () => {
             <input
               type="email"
               placeholder="Email"
-              className="w-full text-black placeholder-[#F15894] py-2 mb-4 bg-transparent border-b border-[#ee2b7b] focus:outline-none focus:border-[#ee2b7b]"
+              className="w-full text-black placeholder-[#FF277E] py-2 mb-4 bg-transparent border-b border-[#FF277E] focus:outline-none focus:border-[#FF277E]"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
             <input
               type="password"
               placeholder="Password"
-              className="w-full text-black placeholder-[#F15894] py-2 mb-4 bg-transparent border-b border-[#ee2b7b] focus:outline-none focus:border-[#ee2b7b]"
+              className="w-full text-black placeholder-[#FF277E] py-2 mb-4 bg-transparent border-b border-[#FF277E] focus:outline-none focus:border-[#FF277E]"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <button
-            className="w-full bg-[#ee2b7b] text-white font-semibold rounded-md p-4 cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200"
+            className="w-full bg-[#FF277E] text-white font-semibold rounded-md p-4 cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200"
             onClick={signInWithEmail}
             disabled={authing}
           >

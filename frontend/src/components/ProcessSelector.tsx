@@ -48,7 +48,7 @@ const ProcessSelector = ({
                 value={selectedProcess}
                 onChange={handleProcessChange}
                 disabled={isLoading}
-                className="appearance-none bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#ee2b7b]/20 focus:border-[#ee2b7b] disabled:opacity-50 disabled:cursor-not-allowed w-full transition-all duration-200 hover:border-gray-300 shadow-sm hover:shadow-md"
+                className="appearance-none bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#FF277E]/20 focus:border-[#FF277E] disabled:opacity-50 disabled:cursor-not-allowed w-full transition-all duration-200 hover:border-gray-300 shadow-sm hover:shadow-md"
               >
                 {processes.map((process) => (
                   <option key={process.id} value={process.id}>

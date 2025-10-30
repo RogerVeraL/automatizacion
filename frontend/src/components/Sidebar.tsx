@@ -4,19 +4,42 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { menuItems, processItems } from "../config/menu";
+import { Icon } from "@iconify-icon/react";
 import { useNavigation } from "../hooks/useNavigation";
+import { usePathname } from "next/navigation";
 
 type SidebarProps = {
   collapsed?: boolean;
   onToggle?: () => void;
+  loading?: boolean;
 };
 
-const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
+const Sidebar = ({
+  collapsed = false,
+  onToggle,
+  loading = false,
+}: SidebarProps) => {
   const router = useRouter();
   const { isActive, isSubmenuActive } = useNavigation();
   const [isAutomatizacionesOpen, setIsAutomatizacionesOpen] = useState(false);
+  const [internalLoading, setInternalLoading] = useState(false);
+  const pathname = usePathname();
+
+  // Reset loader when path changes
+  useEffect(() => {
+    setInternalLoading(false);
+  }, [pathname]);
+
+  // Show loader on initial mount (e.g., page refresh)
+  useEffect(() => {
+    setInternalLoading(true);
+    const timer = setTimeout(() => setInternalLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleItemClick = (path: string) => {
+    if (pathname === path) return; // No volver a cargar si ya está en la ruta
+    setInternalLoading(true);
     router.push(path);
   };
 
@@ -30,6 +53,21 @@ const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
       setIsAutomatizacionesOpen(true);
     }
   }, [isSubmenuActive]);
+
+  if (loading || internalLoading) {
+    return (
+      <aside
+        className={`sticky top-0 self-start bg-white shadow-lg h-screen border-r border-gray-200 flex items-center justify-center transition-all duration-300 overflow-x-hidden overflow-y-auto ${
+          collapsed ? "w-8" : "w-64"
+        }`}
+      >
+        <div className="w-full flex flex-col items-center justify-center h-full p-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF277E]"></div>
+          <span className="mt-2 text-[#FF277E]">Cargando menú...</span>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside
@@ -69,13 +107,21 @@ const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
             <li key={item.id}>
               <button
                 onClick={() => handleItemClick(item.path)}
-                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors duration-200 ${
+                className={`w-full flex flex-row items-center px-4 py-3 rounded-lg font-medium transition-colors duration-200 ${
                   isActive(item.path)
                     ? "bg-gray-100 text-gray-900 font-bold"
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                {item.label}
+                {item.icon && (
+                  <Icon
+                    icon={item.icon}
+                    width={30}
+                    height={30}
+                    className="mr-3"
+                  />
+                )}
+                <span className="text-base">{item.label}</span>
               </button>
             </li>
           ))}
@@ -84,13 +130,19 @@ const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
           <li>
             <button
               onClick={handleAutomatizacionesToggle}
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-between ${
+              className={`w-full flex flex-row items-center px-4 py-3 rounded-lg font-medium transition-colors duration-200 ${
                 isSubmenuActive(processItems)
                   ? "bg-gray-100 text-gray-900 font-bold"
                   : "text-gray-700 hover:bg-gray-50"
               }`}
             >
-              <span>Automatizaciones</span>
+              <Icon
+                icon="material-symbols:automation"
+                width={30}
+                height={30}
+                className="mr-3"
+              />
+              <span className="flex-1 text-base">Automatizaciones</span>
               {isAutomatizacionesOpen ? (
                 <ChevronDown className="w-4 h-4" />
               ) : (
@@ -106,7 +158,7 @@ const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
                       onClick={() => handleItemClick(item.path)}
                       className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                         isActive(item.path)
-                          ? "bg-[#ee2b7b] text-white"
+                          ? "bg-[#FF277E] text-white"
                           : "text-gray-600 hover:bg-gray-50"
                       }`}
                     >

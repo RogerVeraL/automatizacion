@@ -19,8 +19,8 @@ export const useNavigation = () => {
     }
 
     // Rutas dinámicas para pendientes
-    if (pathname.startsWith("/pendiente-")) {
-      return "Pendientes";
+    if (pathname.startsWith("/tareas-")) {
+      return "Tareas";
     }
 
     switch (pathname) {
@@ -28,8 +28,8 @@ export const useNavigation = () => {
         return "Home";
       case "/dashboard":
         return "Dashboard";
-      case "/pendientes":
-        return "Pendientes";
+      case "/tareas":
+        return "Tareas";
       case "/indicador-de-equipos":
         return "Indicador de Equipos";
       case "/Cruce-CMDB":

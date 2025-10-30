@@ -238,7 +238,7 @@ const Proceso1 = () => {
     return (
       <div className="h-[80vh] w-[70vw] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF277E] mx-auto"></div>
           <p className="mt-2 text-gray-600">Cargando datos...</p>
         </div>
       </div>
@@ -262,7 +262,7 @@ const Proceso1 = () => {
                 <div className="absolute -inset-1 rounded-lg group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                 <Button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="relative bg-[#ee2b7b] hover:bg-[#ee2b7b] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
+                  className="relative bg-[#FF277E] hover:bg-[#FF277E] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
                 >
                   <Filter className="h-4 w-4 mr-2" />
                   Filtros
@@ -276,7 +276,7 @@ const Proceso1 = () => {
 
               {appliedFilters.length > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="bg-[#ee2b7b] text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="bg-[#FF277E] text-white px-3 py-1 rounded-full text-sm font-medium">
                     {appliedFilters.length} filtro
                     {appliedFilters.length > 1 ? "s" : ""} aplicado
                     {appliedFilters.length > 1 ? "s" : ""}
@@ -316,10 +316,10 @@ const Proceso1 = () => {
                         animationDelay: `${index * 100}ms`,
                       }}
                     >
-                      <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-[#ee2b7b] group">
+                      <div className="bg-white rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-[##FF27E] group">
                         <div className="flex items-center gap-3">
                           {/* Número de filtro */}
-                          <div className="flex-shrink-0 w-8 h-8 bg-[#ee2b7b] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          <div className="flex-shrink-0 w-8 h-8 bg-[##FF27E] rounded-full flex items-center justify-center text-white font-bold text-sm">
                             {index + 1}
                           </div>
 
@@ -333,7 +333,7 @@ const Proceso1 = () => {
                               onChange={(e) =>
                                 updateFilter(filter.id, "field", e.target.value)
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#ee2b7b] focus:border-[#ee2b7b] transition-all duration-200 bg-white"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FF277E] focus:border-[#FF277E] transition-all duration-200 bg-white"
                             >
                               {fieldOptions.map((option) => (
                                 <option key={option.value} value={option.value}>
@@ -357,7 +357,7 @@ const Proceso1 = () => {
                                   e.target.value
                                 )
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#ee2b7b] focus:border-[#ee2b7b] transition-all duration-200 bg-white"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FF277E] focus:border-[#FF277E] transition-all duration-200 bg-white"
                             >
                               {operatorOptions.map((option) => (
                                 <option key={option.value} value={option.value}>
@@ -383,7 +383,7 @@ const Proceso1 = () => {
                                     e.target.value
                                   )
                                 }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#ee2b7b] focus:border-[#ee2b7b] transition-all duration-200"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FF277E] focus:border-[#FF277E] transition-all duration-200"
                               />
                             </div>
                           )}
@@ -410,7 +410,7 @@ const Proceso1 = () => {
               <div className="flex items-center justify-between p-6 pt-4 border-t border-gray-200 bg-white rounded-b-xl">
                 <Button
                   onClick={addFilter}
-                  className="bg-[#ee2b7b] hover:bg-[#ee2b7b] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="bg-[#FF277E] hover:bg-[#FF277E] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Agregar Filtro
@@ -427,7 +427,7 @@ const Proceso1 = () => {
                   </Button>
                   <Button
                     onClick={applyFilters}
-                    className="bg-[#ee2b7b] hover:bg-[#ee2b7b] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    className="bg-[#FF277E] hover:bg-[#FF277E] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
                   >
                     Aplicar Filtros
                   </Button>
@@ -461,7 +461,7 @@ const Proceso1 = () => {
                       <div className="text-sm text-gray-600">
                         {operatorLabel}
                         {filter.operator !== "empty" && (
-                          <span className="text-[#ee2b7b] font-medium ml-1">
+                          <span className="text-[#FF277E] font-medium ml-1">
                             {filter.value}
                           </span>
                         )}
@@ -494,7 +494,7 @@ const Proceso1 = () => {
             searchButton={
               <Button
                 onClick={() => loadData()}
-                className="relative bg-[#ee2b7b] hover:bg-[#ee2b7b] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
+                className="relative bg-[#FF277E] hover:bg-[#FF277E] text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Cargar data
@@ -511,7 +511,7 @@ const Proceso1 = () => {
             {/* Header del modal */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#ee2b7b] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#FF277E] rounded-lg flex items-center justify-center">
                   <FileSpreadsheet className="h-5 w-5 text-white" />
                 </div>
                 <div>
@@ -537,7 +537,7 @@ const Proceso1 = () => {
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 ${
                 isDragOver
-                  ? "border-[#ee2b7b] bg-[#ee2b7b]/5"
+                  ? "border-[#FF277E] bg-[#FF277E]/5"
                   : "border-gray-300 hover:border-gray-400"
               }`}
               onDrop={handleDrop}
@@ -583,7 +583,7 @@ const Proceso1 = () => {
                   <Button
                     onClick={() => fileInputRef.current?.click()}
                     variant="outline"
-                    className="border-[#ee2b7b] text-[#ee2b7b] hover:bg-[#ee2b7b] hover:text-white"
+                    className="border-[#FF277E] text-[#FF277E] hover:bg-[#FF277E] hover:text-white"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Seleccionar archivo
@@ -630,7 +630,7 @@ const Proceso1 = () => {
               <Button
                 onClick={handleUpload}
                 disabled={!selectedFile || uploadSuccess}
-                className="flex-1 bg-[#ee2b7b] hover:bg-[#ee2b7b] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-[#FF277E] hover:bg-[#FF277E] text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {uploadSuccess ? (
                   <>

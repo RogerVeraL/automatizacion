@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
 import Image from "next/image";
-import Logo from "../images/comfama_logo.png";
+import Logo from "../images/Comfama_logo.svg";
 import { useNavigation } from "../hooks/useNavigation";
 
 type HeaderProps = {};
@@ -27,10 +27,10 @@ const Header = ({}: HeaderProps) => {
         </button>
       </div>
       <div className="flex items-center space-x-6">
-        <span className="text-lg text-white bg-[#ee2b7b] px-2 py-1 rounded-lg font-medium">
+        <span className="text-lg text-white bg-[#FF277E] px-2 py-1 rounded-lg font-medium">
           {getSectionName()}
         </span>
-        <div className="w-8 h-8 bg-[#ee2b7b] rounded-full flex items-center justify-center">
+        <div className="w-8 h-8 bg-[#FF277E] rounded-full flex items-center justify-center">
           <User className="w-5 h-5 text-white" />
         </div>
       </div>

@@ -74,7 +74,7 @@ export interface ChartWrapperProps {
 
 // Colores por defecto
 const defaultColors: ColorConfig = {
-  primary: "#ee2b7b",
+  primary: "#FF277E",
   secondary: "#22c55e",
   tertiary: "#1e40af",
   background: "#ffffff",

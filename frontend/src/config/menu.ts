@@ -1,7 +1,10 @@
+import { Icon } from "@iconify-icon/react";
+
 export interface MenuItem {
   id: string;
   label: string;
   path: string;
+  icon?: string;
 }
 
 export interface ProcessItem {
@@ -12,9 +15,24 @@ export interface ProcessItem {
 
 // Menú principal
 export const menuItems: MenuItem[] = [
-  { id: "Home", label: "Home", path: "/" },
-  { id: "Dashboard", label: "Dashboard", path: "/dashboard" },
-  { id: "Pendientes", label: "Pendientes", path: "/pendientes" },
+  {
+    id: "Home",
+    label: "Home",
+    path: "/",
+    icon: "mdi:home",
+  },
+  {
+    id: "Dashboard",
+    label: "Dashboard",
+    path: "/dashboard",
+    icon: "ep:trend-charts",
+  },
+  {
+    id: "Tareas",
+    label: "Tareas",
+    path: "/tareas",
+    icon: "clarity:tasks-solid",
+  },
 ];
 
 // Procesos de automatización
@@ -31,7 +49,7 @@ export const processItems: ProcessItem[] = [
   { id: "Proceso6", label: "Proceso 6", path: "/proceso-6" },
 ];
 
-// Configuración de procesos para el dashboard
+// Configuración de procesos para el home
 export const dashboardProcesses = [
   {
     id: 1,
