@@ -2,11 +2,13 @@ import { lazy } from "react";
 
 // Lazy loading de componentes de procesos
 export const processRoutes = {
-  tareas: lazy(() => import("../components/processes/Pendientes")),
+  pendientes: null, // Se maneja directamente en la página dinámica
   "indicador-de-equipos": lazy(
-    () => import("../components/processes/Indicador de Equipos")
+    () => import("../components/processes/Indicador-de-Equipos")
   ),
-  "Cruce CMDB": lazy(() => import("../components/processes/Crucecmbd")),
+  "Cruce-CMDB": lazy(() => import("../components/processes/Crucecmdb")),
+  TodoList: lazy(() => import("../components/TodoList")),
+  inventario: lazy(() => import("../components/processes/Inventario")),
   "proceso-3": lazy(() => import("../components/processes/Proceso3")),
   "proceso-4": lazy(() => import("../components/processes/Proceso4")),
   "proceso-5": lazy(() => import("../components/processes/Proceso5")),
@@ -15,9 +17,13 @@ export const processRoutes = {
 
 // Configuración de metadatos para cada Proceso
 export const processMetadata = {
-  tareas: {
-    title: "Tareas",
-    description: "Gestión de tareas",
+  pendientes: {
+    title: "Pendientes",
+    description: "Gestión de tareas pendientes",
+  },
+  TodoList: {
+    title: "TodoList",
+    description: "Gestión de pendientes",
   },
   "indicador-de-equipos": {
     title: "Indicador de Equipos",
@@ -25,9 +31,13 @@ export const processMetadata = {
     showDataTable: true,
     globalFilterColumn: "name",
   },
-  "Cruce CMDB": {
+  "Cruce-CMDB": {
     title: "Cruce CMDB",
-    description: "Descripción del proceso 2",
+    description: "Cruce CMBD",
+  },
+  inventario: {
+    title: "Inventario Bodega",
+    description: "Inventario",
   },
   "proceso-3": {
     title: "Proceso 3",
@@ -49,7 +59,11 @@ export const processMetadata = {
 
 // Función helper para obtener el componente correcto
 export const getProcessComponent = (slug: string) => {
-  return processRoutes[slug as keyof typeof processRoutes];
+  const component = processRoutes[slug as keyof typeof processRoutes];
+  if (component === null) {
+    throw new Error(`Component for ${slug} is handled specially`);
+  }
+  return component;
 };
 
 // Función helper para obtener metadatos

@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import TodoList from "../../components/TodoList";
+import LoadingSpinner from "../../components/ui/loading-spinner";
 import {
   getProcessComponent,
   getProcessMetadata,
@@ -13,14 +14,6 @@ import {
 type PageProps = {
   params: { slug: string };
 };
-
-// Componente de carga
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center p-8">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF277E]"></div>
-    <span className="ml-3 text-[#FF277E]">Cargando...</span>
-  </div>
-);
 
 // Componente para procesos no válidos
 const InvalidProcess = ({ title }: { title: string }) => (
@@ -65,6 +58,28 @@ export default function DynamicPage({ params }: PageProps) {
   const metadata = getProcessMetadata(slug);
   const title = metadata.title;
 
+  // Caso especial para pendientes: usar TodoList directamente con props
+  if (slug === "pendientes") {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex">
+          <Sidebar collapsed={!isSidebarOpen} onToggle={handleToggleSidebar} />
+          <main className="flex-1 bg-white p-8 min-h-screen">
+            <div className="max-w-[77vw] mx-auto">
+              <h1 className="text-3xl font-bold text-black mb-6">{title}</h1>
+              <TodoList
+                storageKey="todo-pendientes"
+                title="Pendientes"
+                showHeader={false}
+              />
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   // Obtener el componente del proceso
   const ProcessComponent = getProcessComponent(slug);
 
@@ -75,7 +90,13 @@ export default function DynamicPage({ params }: PageProps) {
         <Sidebar collapsed={!isSidebarOpen} onToggle={handleToggleSidebar} />
         <main className="flex-1 bg-white p-8 min-h-screen">
           <div className="max-w-[77vw] mx-auto">
-            <h1 className="text-3xl font-bold text-black mb-6">{title}</h1>
+            <h1
+              className={`text-4xl font-bold text-black mb-6 ${
+                slug === "inventario" ? "text-center" : ""
+              }`}
+            >
+              {title}
+            </h1>
             <Suspense fallback={<LoadingSpinner />}>
               <ProcessComponent />
             </Suspense>

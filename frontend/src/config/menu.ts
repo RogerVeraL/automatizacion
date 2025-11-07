@@ -28,10 +28,16 @@ export const menuItems: MenuItem[] = [
     icon: "ep:trend-charts",
   },
   {
-    id: "Tareas",
-    label: "Tareas",
-    path: "/tareas",
+    id: "Pendientes",
+    label: "Pendientes",
+    path: "/pendientes",
     icon: "clarity:tasks-solid",
+  },
+  {
+    id: "Inventario",
+    label: "Inventario",
+    path: "/inventario",
+    icon: "material-symbols:inventory-2",
   },
 ];
 

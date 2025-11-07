@@ -3,6 +3,7 @@
 import EquipmentChart from "./ui/linechart";
 import ChartCard from "./ChartCard";
 import ProcessSelector from "./ProcessSelector";
+import LoadingSpinner from "./ui/loading-spinner";
 import { useProcessData } from "../hooks/useProcessData";
 
 const DashboardContent = () => {
@@ -20,10 +21,7 @@ const DashboardContent = () => {
       <main className="flex-1 bg-gray-50 p-6 min-h-screen">
         <div className="max-w-8xl mx-auto">
           <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF277E] mx-auto"></div>
-              <p className="mt-2 text-gray-600">Cargando datos...</p>
-            </div>
+            <LoadingSpinner />
           </div>
         </div>
       </main>

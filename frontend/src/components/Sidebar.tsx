@@ -7,6 +7,7 @@ import { menuItems, processItems } from "../config/menu";
 import { Icon } from "@iconify-icon/react";
 import { useNavigation } from "../hooks/useNavigation";
 import { usePathname } from "next/navigation";
+import LoadingSpinner from "./ui/loading-spinner";
 
 type SidebarProps = {
   collapsed?: boolean;
@@ -61,10 +62,7 @@ const Sidebar = ({
           collapsed ? "w-8" : "w-64"
         }`}
       >
-        <div className="w-full flex flex-col items-center justify-center h-full p-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF277E]"></div>
-          <span className="mt-2 text-[#FF277E]">Cargando menú...</span>
-        </div>
+        <LoadingSpinner />
       </aside>
     );
   }
