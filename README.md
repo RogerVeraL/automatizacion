@@ -257,7 +257,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 👥 Equipo
 
-- **Desarrollo Frontend**: [Tu nombre]
+- **Desarrollo Frontend**: [Alejandro Loaiza]
 - **Diseño UI/UX**: [Diseñador]
 - **Product Owner**: [PO]
 
