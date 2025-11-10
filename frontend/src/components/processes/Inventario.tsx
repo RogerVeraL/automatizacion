@@ -11,7 +11,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Upload, CheckCircle2, XCircle } from "lucide-react";
+import {
+  Upload,
+  CheckCircle2,
+  XCircle,
+  FileSpreadsheet,
+  TrendingUp,
+  AlertCircle,
+  BarChart3,
+  Send,
+} from "lucide-react";
 import DataTable from "../ui/datatable";
 import ExcelUploadButton from "../ui/excel-upload-button";
 import LoadingSpinner from "../ui/loading-spinner";
@@ -37,8 +46,8 @@ interface ExcelRow {
 
 interface ComparacionResult {
   serial: string;
-  estadoExcel: EstadoPermitido;
-  coincidencia: "encontrado" | "no_encontrado";
+  estadoExcel: EstadoPermitido | "Faltante";
+  coincidencia: "encontrado" | "no_encontrado" | "faltante";
   observacion?: string;
 }
 
@@ -67,8 +76,12 @@ const ESTADOS_PERMITIDOS: EstadoPermitido[] = [
 ];
 
 const FILA_INICIO_DATOS = 3; // La fila 3 contiene el encabezado (índice 2 en base 0)
+const COLUMNA_NOMBRE = "nombre";
 const COLUMNA_NUMERO_SERIE = "Número de serie";
 const COLUMNA_ESTADO = "Estado";
+
+// Prefijos permitidos para filtrar seriales
+const PREFIJOS_PERMITIDOS = ["01-", "02-"];
 
 // Colores para la gráfica de torta por estado
 const COLORES_POR_ESTADO: Record<EstadoPermitido, string> = {
@@ -120,8 +133,40 @@ const esEstadoPermitido = (estado: string): estado is EstadoPermitido => {
 };
 
 /**
+ * Valida si un nombre tiene un prefijo permitido
+ * Single Responsibility: Solo valida prefijos
+ */
+const tienePrefijoPermitido = (nombre: string): boolean => {
+  if (!nombre || typeof nombre !== "string") return false;
+  const nombreTrimmed = nombre.trim();
+  return PREFIJOS_PERMITIDOS.some((prefijo) =>
+    nombreTrimmed.startsWith(prefijo)
+  );
+};
+
+/**
+ * Valida si el nombre termina con el número de serie
+ * Single Responsibility: Solo valida la relación nombre-serial
+ */
+const nombreTerminaConSerial = (
+  nombre: string,
+  numeroSerie: string
+): boolean => {
+  if (!nombre || !numeroSerie) return false;
+  const nombreTrimmed = nombre.trim();
+  const serialTrimmed = numeroSerie.trim();
+  return nombreTrimmed.endsWith(serialTrimmed);
+};
+
+/**
  * Filtra y extrae las filas válidas del Excel
  * Single Responsibility: Solo filtra y transforma datos del Excel
+ *
+ * Lógica:
+ * - Lee "Número de serie" para la comparación (como antes)
+ * - Lee "nombre" para validar el prefijo (01- o 02-)
+ * - Si el nombre tiene prefijo diferente a 01- o 02-, excluye la fila
+ * - Si el nombre tiene prefijo 01- o 02-, incluye la fila y usa "Número de serie" para comparar
  */
 const extraerFilasExcel = (jsonData: any[][]): ExcelRow[] => {
   if (jsonData.length === 0) return [];
@@ -131,11 +176,18 @@ const extraerFilasExcel = (jsonData: any[][]): ExcelRow[] => {
     encabezados,
     COLUMNA_NUMERO_SERIE
   );
+  const indiceNombre = encontrarIndiceColumna(encabezados, COLUMNA_NOMBRE);
   const indiceEstado = encontrarIndiceColumna(encabezados, COLUMNA_ESTADO);
 
-  if (indiceNumeroSerie === -1 || indiceEstado === -1) {
+  if (indiceEstado === -1) {
     throw new Error(
-      `No se encontraron las columnas "${COLUMNA_NUMERO_SERIE}" o "${COLUMNA_ESTADO}" en el archivo Excel.`
+      `No se encontró la columna "${COLUMNA_ESTADO}" en el archivo Excel.`
+    );
+  }
+
+  if (indiceNumeroSerie === -1) {
+    throw new Error(
+      `No se encontró la columna "${COLUMNA_NUMERO_SERIE}" en el archivo Excel.`
     );
   }
 
@@ -144,22 +196,67 @@ const extraerFilasExcel = (jsonData: any[][]): ExcelRow[] => {
   // Empezar desde la fila 1 (después del encabezado)
   for (let i = 1; i < jsonData.length; i++) {
     const fila = jsonData[i];
-    const numeroSerie = fila[indiceNumeroSerie];
     const estado = fila[indiceEstado];
+    const numeroSerie = fila[indiceNumeroSerie];
+    const nombre = indiceNombre !== -1 ? fila[indiceNombre] : null;
 
+    // Validar estado primero
     if (
-      numeroSerie &&
-      typeof numeroSerie === "string" &&
-      numeroSerie.trim() !== "" &&
-      estado &&
-      typeof estado === "string" &&
-      esEstadoPermitido(estado.trim())
+      !estado ||
+      typeof estado !== "string" ||
+      !esEstadoPermitido(estado.trim())
     ) {
-      filasValidas.push({
-        numeroSerie: numeroSerie.trim(),
-        estado: estado.trim() as EstadoPermitido,
-      });
+      continue;
     }
+
+    // Validar que tenga número de serie
+    if (
+      !numeroSerie ||
+      typeof numeroSerie !== "string" ||
+      numeroSerie.trim() === ""
+    ) {
+      continue;
+    }
+
+    // Validar prefijo del nombre (si existe la columna nombre)
+    // Si existe la columna nombre, validar que tenga prefijo permitido
+    if (indiceNombre !== -1) {
+      // Si la columna nombre existe, validar el prefijo
+      if (nombre) {
+        const nombreStr =
+          typeof nombre === "string" ? nombre.trim() : String(nombre).trim();
+
+        // Si el nombre tiene un prefijo diferente a 01- o 02-, excluir esta fila
+        if (nombreStr && !tienePrefijoPermitido(nombreStr)) {
+          continue; // Excluir esta fila
+        }
+
+        // Validar que el nombre termine con el número de serie (validación adicional de consistencia)
+        // Esto asegura que el nombre y el serial estén relacionados
+        // Ejemplo: "01-5J6RKFS" debería terminar con "5J6RKFS"
+        if (nombreStr) {
+          const numeroSerieTrimmed = numeroSerie.trim();
+          if (!nombreTerminaConSerial(nombreStr, numeroSerieTrimmed)) {
+            // Si no termina con el serial, podría ser que el serial esté en el nombre de otra forma
+            // Por ahora, excluir para mantener la consistencia
+            // Pero podríamos hacer esto más flexible si es necesario
+            continue;
+          }
+        }
+      }
+      // Si la columna nombre existe pero está vacía, también excluir (para mantener consistencia)
+      // Comentado para permitir filas sin nombre si es necesario
+      // else {
+      //   continue;
+      // }
+    }
+
+    // Si pasó todas las validaciones, incluir la fila
+    // Usar "Número de serie" para la comparación (como antes)
+    filasValidas.push({
+      numeroSerie: numeroSerie.trim(),
+      estado: estado.trim() as EstadoPermitido,
+    });
   }
 
   return filasValidas;
@@ -181,17 +278,37 @@ const compararSeriales = (
   filasExcel: ExcelRow[],
   serialesTabla: string[]
 ): ComparacionResult[] => {
-  return filasExcel.map((filaExcel) => {
+  const resultados: ComparacionResult[] = [];
+
+  // Comparar seriales del Excel con los de la tabla
+  filasExcel.forEach((filaExcel) => {
     const encontrado = serialesTabla.some((serialTabla) =>
       serialCoincide(serialTabla, filaExcel.numeroSerie)
     );
 
-    return {
+    resultados.push({
       serial: filaExcel.numeroSerie,
       estadoExcel: filaExcel.estado,
       coincidencia: encontrado ? "encontrado" : "no_encontrado",
-    };
+    });
   });
+
+  // Encontrar seriales que están en la tabla pero no en el Excel (Faltantes)
+  serialesTabla.forEach((serialTabla) => {
+    const existeEnExcel = filasExcel.some((filaExcel) =>
+      serialCoincide(serialTabla, filaExcel.numeroSerie)
+    );
+
+    if (!existeEnExcel) {
+      resultados.push({
+        serial: serialTabla,
+        estadoExcel: "Faltante" as EstadoPermitido | "Faltante",
+        coincidencia: "faltante",
+      });
+    }
+  });
+
+  return resultados;
 };
 
 /**
@@ -257,21 +374,17 @@ const calcularEstadisticasGenerales = (
 
 const Inventario = () => {
   const [rows, setRows] = useState<InventarioRow[]>([
-    { id: "1", serial: "", observacion: "" },
-    { id: "2", serial: "", observacion: "" },
-    { id: "3", serial: "", observacion: "" },
-    { id: "4", serial: "", observacion: "" },
-    { id: "5", serial: "", observacion: "" },
-    { id: "6", serial: "", observacion: "" },
-    { id: "7", serial: "", observacion: "" },
-    { id: "8", serial: "", observacion: "" },
-    { id: "9", serial: "", observacion: "" },
+    { id: Date.now().toString(), serial: "", observacion: "" },
   ]);
 
   const [excelData, setExcelData] = useState<ExcelRow[]>([]);
   const [rightTableData, setRightTableData] = useState<ComparacionResult[]>([]);
   const [estadisticas, setEstadisticas] = useState<Estadisticas | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [archivoCargado, setArchivoCargado] = useState<string | null>(null);
+  const inputRefs = React.useRef<{ [key: string]: HTMLInputElement | null }>(
+    {}
+  );
 
   const handleCellChange = (
     id: string,
@@ -281,6 +394,70 @@ const Inventario = () => {
     setRows((prevRows) =>
       prevRows.map((row) => (row.id === id ? { ...row, [field]: value } : row))
     );
+  };
+
+  const handleAddRow = (afterId?: string) => {
+    const newId =
+      Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    const newRow: InventarioRow = {
+      id: newId,
+      serial: "",
+      observacion: "",
+    };
+
+    if (afterId) {
+      setRows((prevRows) => {
+        const index = prevRows.findIndex((row) => row.id === afterId);
+        if (index === -1) {
+          return [...prevRows, newRow];
+        }
+        const newRows = [...prevRows];
+        newRows.splice(index + 1, 0, newRow);
+        return newRows;
+      });
+    } else {
+      setRows((prevRows) => [...prevRows, newRow]);
+    }
+
+    // Focus en el nuevo input después de un pequeño delay
+    setTimeout(() => {
+      const serialInput = inputRefs.current[`${newId}-serial`];
+      if (serialInput) {
+        serialInput.focus();
+      }
+    }, 10);
+  };
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    rowId: string,
+    field: "serial" | "observacion"
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const isLastRow = rows[rows.length - 1]?.id === rowId;
+
+      if (isLastRow) {
+        // Si es la última fila, agregar una nueva
+        handleAddRow(rowId);
+      } else {
+        // Si no es la última, mover el focus a la siguiente fila
+        const currentIndex = rows.findIndex((row) => row.id === rowId);
+        if (currentIndex !== -1 && currentIndex < rows.length - 1) {
+          const nextRow = rows[currentIndex + 1];
+          const nextInput = inputRefs.current[`${nextRow.id}-${field}`];
+          if (nextInput) {
+            nextInput.focus();
+          }
+        }
+      }
+    } else if (e.key === "Tab" && field === "observacion") {
+      const isLastRow = rows[rows.length - 1]?.id === rowId;
+      if (isLastRow && !e.shiftKey) {
+        e.preventDefault();
+        handleAddRow(rowId);
+      }
+    }
   };
 
   const handleFileUpload = async (file: File) => {
@@ -301,12 +478,23 @@ const Inventario = () => {
 
       if (filasExcel.length === 0) {
         alert(
-          "No se encontraron filas válidas con los estados permitidos (Available, Awaiting Disposal, Reserved, Preparación)."
+          "No se encontraron filas válidas. Verifica que:\n" +
+            "1. Las filas tengan estados permitidos (Available, Awaiting Disposal, Reserved, Preparación)\n" +
+            "2. Si existe la columna 'nombre', debe tener prefijo '01-' o '02-'\n" +
+            "3. El 'nombre' debe terminar con el 'Número de serie'\n" +
+            "4. Las filas deben tener 'Número de serie' válido"
         );
         return;
       }
 
+      // Limpiar solo los datos del Excel anterior (mantener seriales manuales)
       setExcelData(filasExcel);
+      setRightTableData([]);
+      setEstadisticas(null);
+      setArchivoCargado(file.name);
+
+      console.log("Total de filas válidas encontradas:", filasExcel.length);
+      console.log("Ejemplo de filas (primeras 3):", filasExcel.slice(0, 3));
       console.log("Datos extraídos del Excel:", filasExcel);
     } catch (error) {
       console.error("Error al procesar el archivo Excel:", error);
@@ -336,12 +524,32 @@ const Inventario = () => {
       return;
     }
 
+    // Debug: mostrar los seriales que se van a comparar
+    console.log("Seriales de la tabla izquierda:", serialesTabla);
+    console.log(
+      "Datos del Excel (primeros 5):",
+      excelData.slice(0, 5).map((f) => f.numeroSerie)
+    );
+
     // Realizar la comparación usando función pura
     const resultados = compararSeriales(excelData, serialesTabla);
 
-    // Agregar observaciones a los resultados encontrados
+    // Debug: mostrar resultados de la comparación
+    console.log(
+      "Resultados de comparación (primeros 5):",
+      resultados.slice(0, 5)
+    );
+    console.log(
+      "Total encontrados:",
+      resultados.filter((r) => r.coincidencia === "encontrado").length
+    );
+
+    // Agregar observaciones a los resultados encontrados y faltantes
     const resultadosConObservaciones = resultados.map((resultado) => {
-      if (resultado.coincidencia === "encontrado") {
+      if (
+        resultado.coincidencia === "encontrado" ||
+        resultado.coincidencia === "faltante"
+      ) {
         const filaEncontrada = rows.find((row) =>
           serialCoincide(row.serial, resultado.serial)
         );
@@ -385,7 +593,11 @@ const Inventario = () => {
         "Número de serie": item.serial,
         "Estado Excel": item.estadoExcel,
         Coincidencia:
-          item.coincidencia === "encontrado" ? "Encontrado" : "No Encontrado",
+          item.coincidencia === "encontrado"
+            ? "Encontrado"
+            : item.coincidencia === "faltante"
+            ? "Faltante"
+            : "No Encontrado",
         Observación: item.observacion || "",
       }));
 
@@ -406,23 +618,71 @@ const Inventario = () => {
     }
   };
 
-  // Columnas para la tabla de la derecha
+  // Calcular seriales duplicados
+  const serialesDuplicados = useMemo(() => {
+    const serialesConContenido = rows
+      .map((row) => row.serial.trim())
+      .filter((serial) => serial.length > 0);
+
+    const contadorSeriales = new Map<string, number>();
+    serialesConContenido.forEach((serial) => {
+      const serialLower = serial.toLowerCase();
+      contadorSeriales.set(
+        serialLower,
+        (contadorSeriales.get(serialLower) || 0) + 1
+      );
+    });
+
+    const duplicados = Array.from(contadorSeriales.entries())
+      .filter(([_, count]) => count > 1)
+      .map(([serialLower, count]) => {
+        // Encontrar el serial original (con mayúsculas/minúsculas originales)
+        const serialOriginal = serialesConContenido.find(
+          (s) => s.toLowerCase() === serialLower
+        );
+        return { serial: serialOriginal || serialLower, count };
+      });
+
+    return {
+      lista: duplicados,
+      cantidad: duplicados.length,
+    };
+  }, [rows]);
+
+  // Columnas para la tabla de la derecha con tamaños automáticos
   const columns = useMemo(
     () => [
       {
         accessorKey: "serial",
         header: "Serial",
         cell: ({ row }: { row: any }) => (
-          <div className="font-medium">{row.getValue("serial")}</div>
+          <div className="font-medium whitespace-nowrap">
+            {row.getValue("serial")}
+          </div>
         ),
+        minSize: 150,
+        maxSize: 300,
       },
       {
         accessorKey: "estadoExcel",
         header: "Estado Excel",
         cell: ({ row }: { row: any }) => {
-          const estado = row.getValue("estadoExcel") as EstadoPermitido;
-          return <div className="font-medium text-gray-700">{estado}</div>;
+          const estado = row.getValue("estadoExcel") as
+            | EstadoPermitido
+            | "Faltante";
+          const isFaltante = estado === "Faltante";
+          return (
+            <div
+              className={`font-medium whitespace-nowrap ${
+                isFaltante ? "text-orange-600" : "text-gray-700"
+              }`}
+            >
+              {estado}
+            </div>
+          );
         },
+        minSize: 140,
+        maxSize: 220,
       },
       {
         accessorKey: "coincidencia",
@@ -430,16 +690,22 @@ const Inventario = () => {
         cell: ({ row }: { row: any }) => {
           const coincidencia = row.getValue("coincidencia") as string;
           const isEncontrado = coincidencia === "encontrado";
+          const isFaltante = coincidencia === "faltante";
           return (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 whitespace-nowrap">
               {isEncontrado ? (
                 <>
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                   <span className="text-green-600 font-medium">Encontrado</span>
+                </>
+              ) : isFaltante ? (
+                <>
+                  <AlertCircle className="h-4 w-4 text-orange-600 flex-shrink-0" />
+                  <span className="text-orange-600 font-medium">Faltante</span>
                 </>
               ) : (
                 <>
-                  <XCircle className="h-4 w-4 text-red-600" />
+                  <XCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
                   <span className="text-red-600 font-medium">
                     No Encontrado
                   </span>
@@ -448,15 +714,19 @@ const Inventario = () => {
             </div>
           );
         },
+        minSize: 160,
+        maxSize: 220,
       },
       {
         accessorKey: "observacion",
         header: "Observación",
         cell: ({ row }: { row: any }) => (
-          <div className="text-gray-600">
+          <div className="text-gray-600 break-words">
             {row.getValue("observacion") || "-"}
           </div>
         ),
+        minSize: 200,
+        // Sin maxSize para que pueda expandirse según el espacio disponible
       },
     ],
     []
@@ -465,63 +735,160 @@ const Inventario = () => {
   return (
     <div className="h-full flex gap-4 p-4">
       {/* Columna izquierda */}
-      <div className="w-2/5 flex flex-col gap-2">
+      <div className="w-2/5 flex flex-col gap-4">
         {/* Botón CARGAR ARCHIVO */}
-        <ExcelUploadButton
-          onUpload={handleFileUpload}
-          buttonText="CARGAR ARCHIVO"
-        />
+        <div className="bg-white rounded-lg border p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <FileSpreadsheet className="h-5 w-5 text-[#FF277E]" />
+            <h3 className="font-semibold text-gray-800">Cargar Inventario</h3>
+          </div>
+          <p className="text-sm text-gray-600 mb-3">
+            Sube un archivo Excel con los seriales y estados de los equipos
+          </p>
+          <ExcelUploadButton
+            onUpload={handleFileUpload}
+            buttonText="CARGAR ARCHIVO"
+          />
+          {archivoCargado && (
+            <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                <span className="text-xs text-green-700 font-medium">
+                  Archivo cargado: {archivoCargado}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Tabla editable */}
-        <div className="rounded-md border flex-1 min-h-0 flex flex-col">
-          <div className="flex-1 overflow-y-auto">
+        <div className="bg-white rounded-lg border flex flex-col shadow-sm max-h-[600px]">
+          <div className="p-4 border-b bg-gray-50 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-gray-800">
+                  Seriales a Comparar
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Ingresa los seriales que deseas buscar. Presiona Enter para
+                  agregar una nueva fila.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="overflow-y-auto flex-1 min-h-0">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-gray-50 sticky top-0 z-10 shadow-sm">
                 <TableRow>
-                  <TableHead className="w-1/2">serial</TableHead>
-                  <TableHead className="w-1/2">observación</TableHead>
+                  <TableHead className="w-1/2 font-semibold bg-gray-50">
+                    Serial
+                  </TableHead>
+                  <TableHead className="w-1/2 font-semibold bg-gray-50">
+                    Observación
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell>
-                      <Input
-                        value={row.serial}
-                        onChange={(e) =>
-                          handleCellChange(row.id, "serial", e.target.value)
-                        }
-                        className="w-full"
-                        placeholder="Ingrese serial"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        value={row.observacion}
-                        onChange={(e) =>
-                          handleCellChange(
-                            row.id,
-                            "observacion",
-                            e.target.value
-                          )
-                        }
-                        className="w-full"
-                        placeholder="Ingrese observación"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {rows.map((row, index) => {
+                  const isLastRow = index === rows.length - 1;
+                  return (
+                    <TableRow key={row.id}>
+                      <TableCell>
+                        <Input
+                          ref={(el) => {
+                            inputRefs.current[`${row.id}-serial`] = el;
+                          }}
+                          value={row.serial}
+                          onChange={(e) =>
+                            handleCellChange(row.id, "serial", e.target.value)
+                          }
+                          onKeyDown={(e) => handleKeyDown(e, row.id, "serial")}
+                          className="w-full"
+                          placeholder="Ingrese serial"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          ref={(el) => {
+                            inputRefs.current[`${row.id}-observacion`] = el;
+                          }}
+                          value={row.observacion}
+                          onChange={(e) =>
+                            handleCellChange(
+                              row.id,
+                              "observacion",
+                              e.target.value
+                            )
+                          }
+                          onKeyDown={(e) =>
+                            handleKeyDown(e, row.id, "observacion")
+                          }
+                          className="w-full"
+                          placeholder={
+                            isLastRow
+                              ? "Ingrese observación"
+                              : "Ingrese observación"
+                          }
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
         </div>
 
+        {/* Contador de seriales y duplicados */}
+        <div className="bg-white rounded-lg border p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileSpreadsheet className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600">Seriales escritos:</span>
+            </div>
+            <span className="text-2xl font-bold text-[#FF277E]">
+              {rows.filter((row) => row.serial.trim().length > 0).length}
+            </span>
+          </div>
+          {serialesDuplicados.cantidad > 0 && (
+            <div className="pt-3 border-t">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-orange-500" />
+                  <span className="text-sm text-gray-600">
+                    Seriales Duplicados:
+                  </span>
+                </div>
+                <span className="text-lg font-bold text-orange-600">
+                  {serialesDuplicados.cantidad}
+                </span>
+              </div>
+              <div className="space-y-1 max-h-32 overflow-y-auto">
+                {serialesDuplicados.lista.map((dup, index) => (
+                  <div
+                    key={index}
+                    className="text-xs bg-orange-50 border border-orange-200 rounded px-2 py-1 flex items-center justify-between"
+                  >
+                    <span className="font-medium text-orange-800">
+                      {dup.serial}
+                    </span>
+                    <span className="text-orange-600 font-semibold">
+                      ({dup.count} veces)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Botón enviar */}
         <Button
           onClick={handleEnviar}
-          className="w-full bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-medium"
+          className="w-full bg-[#FF277E] hover:bg-[#FF277E]/90 text-white px-6 py-3 rounded-lg font-medium shadow-md transition-all duration-200 flex items-center justify-center gap-2"
         >
-          enviar
+          <Send className="h-4 w-4" />
+          Comparar Seriales
         </Button>
       </div>
 
@@ -530,71 +897,119 @@ const Inventario = () => {
         {/* Estadísticas Generales */}
         {estadisticas && (
           <div className="space-y-4">
-            <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg border">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">
-                  {estadisticas.totalExcel}
-                </div>
-                <div className="text-sm text-gray-600">Total en Excel</div>
+            {/* Resumen General */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3 className="h-5 w-5 text-[#FF277E]" />
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Resumen General
+                </h3>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {estadisticas.totalEncontrados}
+              <div className="grid grid-cols-4 gap-4">
+                <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileSpreadsheet className="h-4 w-4 text-gray-500" />
+                    <span className="text-xs text-gray-500 uppercase tracking-wide">
+                      Total en Excel
+                    </span>
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {estadisticas.totalExcel}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-600">Encontrados</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">
-                  {estadisticas.totalNoEncontrados}
+                <div className="bg-white rounded-lg p-4 border border-green-200 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-green-50 to-white">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <span className="text-xs text-gray-500 uppercase tracking-wide">
+                      Encontrados
+                    </span>
+                  </div>
+                  <div className="text-3xl font-bold text-green-600">
+                    {estadisticas.totalEncontrados}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-600">No Encontrados</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {estadisticas.porcentajeEncontrados}%
+                <div className="bg-white rounded-lg p-4 border border-red-200 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-red-50 to-white">
+                  <div className="flex items-center gap-2 mb-2">
+                    <XCircle className="h-4 w-4 text-red-600" />
+                    <span className="text-xs text-gray-500 uppercase tracking-wide">
+                      No Encontrados
+                    </span>
+                  </div>
+                  <div className="text-3xl font-bold text-red-600">
+                    {estadisticas.totalNoEncontrados}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-600">Porcentaje</div>
+                <div className="bg-white rounded-lg p-4 border border-blue-200 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-blue-50 to-white">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs text-gray-500 uppercase tracking-wide">
+                      Porcentaje
+                    </span>
+                  </div>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {estadisticas.porcentajeEncontrados}%
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Estadísticas por Estado */}
+            {/* Estadísticas por Estado y Gráfica */}
             {estadisticas.porEstado.length > 0 && (
-              <div className="space-y-4">
-                <div className="p-4 bg-white rounded-lg border">
-                  <h3 className="text-lg font-semibold mb-3 text-gray-800">
-                    Estadísticas por Estado
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Estadísticas por Estado */}
+                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <AlertCircle className="h-5 w-5 text-[#FF277E]" />
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Por Estado
+                    </h3>
+                  </div>
+                  <div className="space-y-3">
                     {estadisticas.porEstado
                       .filter((est) => est.total > 0)
                       .map((est) => (
                         <div
                           key={est.estado}
-                          className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                          className="p-4 rounded-lg border-2 transition-all hover:shadow-md"
+                          style={{
+                            borderColor: COLORES_POR_ESTADO[est.estado] + "40",
+                            backgroundColor:
+                              COLORES_POR_ESTADO[est.estado] + "08",
+                          }}
                         >
-                          <div className="font-semibold text-gray-700 mb-2">
-                            {est.estado}
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 text-sm">
-                            <div>
-                              <div className="font-bold text-gray-900">
-                                {est.total}
-                              </div>
-                              <div className="text-xs text-gray-500">Total</div>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{
+                                  backgroundColor:
+                                    COLORES_POR_ESTADO[est.estado],
+                                }}
+                              />
+                              <span className="font-semibold text-gray-800">
+                                {est.estado}
+                              </span>
                             </div>
-                            <div>
-                              <div className="font-bold text-green-600">
-                                {est.encontrados}
-                              </div>
-                              <div className="text-xs text-gray-500">
+                            <span className="text-lg font-bold text-gray-900">
+                              {est.total}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="bg-white rounded p-2 border border-green-200">
+                              <div className="text-xs text-gray-500 mb-1">
                                 Encontrados
                               </div>
-                            </div>
-                            <div>
-                              <div className="font-bold text-blue-600">
-                                {est.porcentajeEncontrados}%
+                              <div className="font-bold text-green-600 text-lg">
+                                {est.encontrados}
                               </div>
-                              <div className="text-xs text-gray-500">%</div>
+                            </div>
+                            <div className="bg-white rounded p-2 border border-blue-200">
+                              <div className="text-xs text-gray-500 mb-1">
+                                Porcentaje
+                              </div>
+                              <div className="font-bold text-blue-600 text-lg">
+                                {est.porcentajeEncontrados.toFixed(1)}%
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -603,11 +1018,14 @@ const Inventario = () => {
                 </div>
 
                 {/* Gráfica de Torta - Distribución por Estado */}
-                <div className="p-4 bg-white rounded-lg border">
-                  <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                    Distribución de Equipos por Estado
-                  </h3>
-                  <div className="h-80">
+                <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <BarChart3 className="h-5 w-5 text-[#FF277E]" />
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Distribución Visual
+                    </h3>
+                  </div>
+                  <div className="h-64 mb-4">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -625,17 +1043,11 @@ const Inventario = () => {
                           label={({
                             name,
                             value,
-                            porcentaje,
                           }: {
                             name: string;
                             value: number;
-                            porcentaje: number;
-                          }) =>
-                            `${name}: ${value} (${porcentaje.toFixed(
-                              1
-                            )}% encontrados)`
-                          }
-                          outerRadius={100}
+                          }) => `${name}: ${value}`}
+                          outerRadius={90}
                           fill="#8884d8"
                           dataKey="value"
                         >
@@ -661,32 +1073,69 @@ const Inventario = () => {
                               1
                             )}% encontrados`,
                           ]}
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "8px",
+                            padding: "8px",
+                          }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  {/* Leyenda personalizada */}
-                  <div className="mt-4 flex flex-wrap gap-4 justify-center">
+                  {/* Leyenda personalizada mejorada */}
+                  <div className="space-y-2">
                     {estadisticas.porEstado
                       .filter((est) => est.total > 0)
                       .map((est) => (
                         <div
                           key={est.estado}
-                          className="flex items-center gap-2"
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors"
                         >
-                          <div
-                            className="w-4 h-4 rounded"
-                            style={{
-                              backgroundColor: COLORES_POR_ESTADO[est.estado],
-                            }}
-                          />
-                          <span className="text-sm text-gray-700">
-                            {est.estado}: {est.total} equipos (
-                            {est.porcentajeEncontrados.toFixed(1)}% encontrados)
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-4 h-4 rounded shadow-sm"
+                              style={{
+                                backgroundColor: COLORES_POR_ESTADO[est.estado],
+                              }}
+                            />
+                            <span className="text-sm font-medium text-gray-700">
+                              {est.estado}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm">
+                            <span className="text-gray-600">
+                              {est.total} equipos
+                            </span>
+                            <span className="font-semibold text-blue-600">
+                              {est.porcentajeEncontrados.toFixed(1)}%
+                            </span>
+                          </div>
                         </div>
                       ))}
                   </div>
+
+                  {/* Mostrar seriales faltantes si existen */}
+                  {rightTableData.filter((r) => r.coincidencia === "faltante")
+                    .length > 0 && (
+                    <div className="mt-4 p-4 bg-orange-50 border-2 border-orange-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle className="h-5 w-5 text-orange-600" />
+                        <h4 className=" text-orange-800">Seriales Faltantes</h4>
+                      </div>
+                      <div className="text-sm text-orange-700">
+                        <span className="font-bold text-lg">
+                          {
+                            rightTableData.filter(
+                              (r) => r.coincidencia === "faltante"
+                            ).length
+                          }
+                        </span>{" "}
+                        serial(es) escrito(s) manualmente no se encontraron en
+                        el Excel
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -694,21 +1143,35 @@ const Inventario = () => {
         )}
 
         {/* Área de tabla */}
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 max-h-[500px] bg-white rounded-xl border border-gray-200 shadow-sm overflow-y-auto flex flex-col">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <LoadingSpinner />
             </div>
           ) : (
-            <DataTable
-              data={rightTableData}
-              columns={columns}
-              caption={
-                rightTableData.length > 0
-                  ? "Resultados de la comparación"
-                  : "Los resultados aparecerán aquí después de realizar la comparación"
-              }
-            />
+            <>
+              <div className="p-4 border-b bg-gray-50 flex-shrink-0">
+                <h3 className="font-semibold text-gray-800">
+                  {rightTableData.length > 0
+                    ? `Resultados de la Comparación (${rightTableData.length} registros)`
+                    : "Resultados de la Comparación"}
+                </h3>
+                {rightTableData.length === 0 && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Los resultados aparecerán aquí después de realizar la
+                    comparación
+                  </p>
+                )}
+              </div>
+              <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+                <DataTable
+                  data={rightTableData}
+                  columns={columns}
+                  caption=""
+                  globalFilterColumn="serial"
+                />
+              </div>
+            </>
           )}
         </div>
 
@@ -716,10 +1179,10 @@ const Inventario = () => {
         <Button
           onClick={handleExportar}
           disabled={rightTableData.length === 0}
-          className="w-full bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-[#FF277E] hover:bg-[#FF277E]/90 text-white px-6 py-3 rounded-lg font-medium shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          <Upload className="h-4 w-4 mr-2" />
-          Exportar
+          <Upload className="h-4 w-4" />
+          Exportar Resultados a Excel
         </Button>
       </div>
     </div>

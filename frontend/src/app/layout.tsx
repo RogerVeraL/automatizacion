@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Comfama - Automatización de Procesos",
   description: "Sistema de automatización de procesos para Comfama",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

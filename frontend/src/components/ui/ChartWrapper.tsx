@@ -19,6 +19,12 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+// Wrapper para Legend para evitar problemas de tipos con TypeScript
+const LegendWrapper: React.FC<any> = (props) => {
+  // @ts-expect-error - recharts Legend tiene problemas de tipos con TypeScript
+  return React.createElement(Legend, props);
+};
+
 // Tipos de gráficas disponibles
 export type ChartType = "line" | "bar" | "pie" | "area";
 
@@ -121,7 +127,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
         ticks={finalConfig.yAxisTicks}
       />
       {finalConfig.showTooltip && <Tooltip />}
-      {finalConfig.showLegend && <Legend />}
+      {finalConfig.showLegend && <LegendWrapper />}
     </>
   );
 
@@ -174,12 +180,16 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
 
   // Obtener color por índice
   const getColorByIndex = (index: number): string => {
-    const colors = [
-      finalConfig.colors?.primary || defaultColors.primary,
-      finalConfig.colors?.secondary || defaultColors.secondary,
-      finalConfig.colors?.tertiary || defaultColors.tertiary,
-    ];
-    return colors[index % colors.length];
+    const primaryColor: string =
+      finalConfig.colors?.primary ?? defaultColors.primary ?? "#FF277E";
+    const secondaryColor: string =
+      finalConfig.colors?.secondary ?? defaultColors.secondary ?? "#22c55e";
+    const tertiaryColor: string =
+      finalConfig.colors?.tertiary ?? defaultColors.tertiary ?? "#1e40af";
+
+    const colors: string[] = [primaryColor, secondaryColor, tertiaryColor];
+    const color = colors[index % colors.length];
+    return color;
   };
 
   // Renderizar gráfico de pie
@@ -197,7 +207,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
           cx="50%"
           cy="50%"
           labelLine={false}
-          label={({ name, percent }) =>
+          label={({ name, percent }: { name: string; percent: number }) =>
             `${name} ${(percent * 100).toFixed(0)}%`
           }
           outerRadius={80}
@@ -209,7 +219,7 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
           ))}
         </Pie>
         {finalConfig.showTooltip && <Tooltip />}
-        {finalConfig.showLegend && <Legend />}
+        {finalConfig.showLegend && <LegendWrapper />}
       </PieChart>
     );
   };

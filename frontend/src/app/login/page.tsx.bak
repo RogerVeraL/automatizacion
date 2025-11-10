@@ -7,7 +7,6 @@ import {
   OAuthProvider,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
 import Image from "next/image";
 import Logo from "../../images/Comfama_logo.svg";
 const Login = () => {

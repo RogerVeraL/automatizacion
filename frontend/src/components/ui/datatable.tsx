@@ -43,6 +43,8 @@ export default function DataTable<TData, TValue>({
   const bottomScrollRef = React.useRef<HTMLDivElement | null>(null);
   const [contentWidth, setContentWidth] = React.useState<number>(0);
   const isSyncingRef = React.useRef<boolean>(false);
+  const [globalFilter, setGlobalFilter] = useState<string>("");
+
   const table = useReactTable({
     data,
     columns,
@@ -51,9 +53,33 @@ export default function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row: any, columnId: any, filterValue: string) => {
+      if (!filterValue) return true;
+      const searchValue = filterValue.toLowerCase().trim();
+      // Buscar en todas las columnas visibles
+      return Object.values(row.original).some((value: any) => {
+        if (value === null || value === undefined) return false;
+        // Normalizar el valor: convertir a string y a minúsculas
+        const valueStr = String(value).toLowerCase();
+        // Normalizar el searchValue: reemplazar múltiples espacios por uno solo y guiones bajos por espacios
+        const normalizedSearch = searchValue
+          .replace(/\s+/g, " ")
+          .replace(/_/g, " ")
+          .trim();
+        // Normalizar el valor: reemplazar múltiples espacios por uno solo y guiones bajos por espacios
+        const normalizedValue = valueStr
+          .replace(/\s+/g, " ")
+          .replace(/_/g, " ")
+          .trim();
+        // Buscar con espacios normalizados (búsqueda parcial flexible)
+        return normalizedValue.includes(normalizedSearch);
+      });
+    },
     state: {
       sorting,
       columnFilters,
+      globalFilter,
     },
   });
 
@@ -86,19 +112,11 @@ export default function DataTable<TData, TValue>({
   return (
     <div className="space-y-4 h-full flex flex-col">
       {globalFilterColumn && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 px-4 pt-4">
           <Input
-            placeholder="Buscar..."
-            value={
-              (table
-                .getColumn(globalFilterColumn)
-                ?.getFilterValue() as string) ?? ""
-            }
-            onChange={(e) =>
-              table
-                .getColumn(globalFilterColumn)
-                ?.setFilterValue(e.target.value)
-            }
+            placeholder="Buscar en todas las columnas..."
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
             className="max-w-sm"
           />
           {searchButton}
@@ -107,23 +125,45 @@ export default function DataTable<TData, TValue>({
       <div className="rounded-md border flex-1 min-h-0">
         <div
           ref={tableContainerRef}
-          className="h-full overflow-y-auto overflow-x-hidden"
+          className="h-full overflow-y-auto overflow-x-auto"
         >
-          <Table ref={tableRef} className="min-w-[1600px]">
+          <Table ref={tableRef} className="w-full table-auto">
             {caption && <TableCaption>{caption}</TableCaption>}
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup: any) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header: any) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
+                  {headerGroup.headers.map((header: any) => {
+                    const columnDef = header.column.columnDef as any;
+                    const width = columnDef.size
+                      ? `${columnDef.size}px`
+                      : columnDef.minSize
+                      ? `minmax(${columnDef.minSize}px, 1fr)`
+                      : "1fr";
+                    return (
+                      <TableHead
+                        key={header.id}
+                        style={{
+                          width: columnDef.size
+                            ? `${columnDef.size}px`
+                            : "auto",
+                          minWidth: columnDef.minSize
+                            ? `${columnDef.minSize}px`
+                            : "100px",
+                          maxWidth: columnDef.maxSize
+                            ? `${columnDef.maxSize}px`
+                            : "none",
+                        }}
+                        className="whitespace-nowrap"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableHeader>
@@ -131,14 +171,30 @@ export default function DataTable<TData, TValue>({
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row: any) => (
                   <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell: any) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
+                    {row.getVisibleCells().map((cell: any) => {
+                      const columnDef = cell.column.columnDef as any;
+                      return (
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            width: columnDef.size
+                              ? `${columnDef.size}px`
+                              : "auto",
+                            minWidth: columnDef.minSize
+                              ? `${columnDef.minSize}px`
+                              : "100px",
+                            maxWidth: columnDef.maxSize
+                              ? `${columnDef.maxSize}px`
+                              : "none",
+                          }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))
               ) : (
@@ -155,18 +211,20 @@ export default function DataTable<TData, TValue>({
           </Table>
         </div>
       </div>
-      {/* Bottom horizontal scrollbar - sticky & always visible */}
-      <div className="sticky bottom-0 z-10 bg-background">
-        <div
-          ref={bottomScrollRef}
-          className="w-full overflow-x-scroll h-6"
-          onScroll={handleBottomScroll}
-          aria-hidden
-          style={{ scrollbarGutter: "stable both-edges" as any }}
-        >
-          <div style={{ width: contentWidth }} />
+      {/* Bottom horizontal scrollbar - solo si hay overflow */}
+      {contentWidth > 0 && (
+        <div className="sticky bottom-0 z-10 bg-background">
+          <div
+            ref={bottomScrollRef}
+            className="w-full overflow-x-scroll h-6"
+            onScroll={handleBottomScroll}
+            aria-hidden
+            style={{ scrollbarGutter: "stable both-edges" as any }}
+          >
+            <div style={{ width: contentWidth }} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

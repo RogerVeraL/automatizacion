@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Column } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -16,7 +15,12 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
-  column: Column<TData, TValue>;
+  column: {
+    getCanSort: () => boolean;
+    getIsSorted: () => false | "asc" | "desc";
+    toggleSorting: (desc?: boolean) => void;
+    clearSorting: () => void;
+  };
 }
 
 export function DataPlateColumnHeader<TData, TValue>({
