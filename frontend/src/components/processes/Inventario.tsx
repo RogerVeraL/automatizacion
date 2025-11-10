@@ -24,7 +24,7 @@ import {
 import DataTable from "../ui/datatable";
 import ExcelUploadButton from "../ui/excel-upload-button";
 import LoadingSpinner from "../ui/loading-spinner";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 interface InventarioRow {
@@ -97,12 +97,42 @@ const COLORES_POR_ESTADO: Record<EstadoPermitido, string> = {
  * Extrae los datos del Excel desde la fila especificada
  * Single Responsibility: Solo se encarga de leer y parsear el Excel
  */
-const parseExcelData = (worksheet: XLSX.WorkSheet): any[][] => {
-  // Leer todo el archivo y luego tomar desde la fila especificada
-  const allData = XLSX.utils.sheet_to_json(worksheet, {
-    header: 1,
-    defval: "",
-  }) as any[][];
+const parseExcelData = (worksheet: ExcelJS.Worksheet): any[][] => {
+  const allData: any[][] = [];
+  
+  // Obtener el número máximo de columnas para asegurar que todas las filas tengan el mismo ancho
+  let maxColumnCount = 0;
+  worksheet.eachRow((row) => {
+    maxColumnCount = Math.max(maxColumnCount, row.cellCount);
+  });
+  
+  // Leer todas las filas del worksheet
+  worksheet.eachRow((row, rowNumber) => {
+    const rowData: any[] = [];
+    
+    // Iterar sobre todas las columnas posibles
+    for (let colNumber = 1; colNumber <= maxColumnCount; colNumber++) {
+      const cell = row.getCell(colNumber);
+      let value: any = cell.value;
+      
+      // Si el valor es un objeto (fórmula, rich text, etc.), obtener el texto
+      if (value && typeof value === "object") {
+        if ("text" in value) {
+          value = value.text;
+        } else if ("result" in value) {
+          value = value.result;
+        } else if ("richText" in value && Array.isArray(value.richText)) {
+          value = value.richText.map((rt: any) => rt.text || "").join("");
+        } else {
+          value = String(value);
+        }
+      }
+      
+      rowData.push(value !== null && value !== undefined ? String(value) : "");
+    }
+    
+    allData.push(rowData);
+  });
 
   // Retornar desde la fila 3 (índice 2 en base 0)
   return allData.slice(FILA_INICIO_DATOS - 1);
@@ -464,11 +494,15 @@ const Inventario = () => {
     setIsLoading(true);
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
 
       // Obtener la primera hoja
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
+      const worksheet = workbook.worksheets[0];
+      
+      if (!worksheet) {
+        throw new Error("El archivo Excel no contiene hojas de trabajo.");
+      }
 
       // Parsear datos desde la fila 3
       const jsonData = parseExcelData(worksheet);
@@ -576,7 +610,7 @@ const Inventario = () => {
     setRightTableData(resultadosConObservaciones);
   };
 
-  const handleExportar = () => {
+  const handleExportar = async () => {
     if (rightTableData.length === 0) {
       alert(
         "No hay datos para exportar. Por favor, realiza primero la comparación."
@@ -586,32 +620,55 @@ const Inventario = () => {
 
     try {
       // Crear un nuevo workbook
-      const workbook = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Comparación");
 
-      // Preparar los datos para exportar
-      const datosExportar = rightTableData.map((item) => ({
-        "Número de serie": item.serial,
-        "Estado Excel": item.estadoExcel,
-        Coincidencia:
-          item.coincidencia === "encontrado"
-            ? "Encontrado"
-            : item.coincidencia === "faltante"
-            ? "Faltante"
-            : "No Encontrado",
-        Observación: item.observacion || "",
-      }));
+      // Preparar los encabezados
+      worksheet.columns = [
+        { header: "Número de serie", key: "serial", width: 20 },
+        { header: "Estado Excel", key: "estadoExcel", width: 20 },
+        { header: "Coincidencia", key: "coincidencia", width: 20 },
+        { header: "Observación", key: "observacion", width: 30 },
+      ];
 
-      // Crear la hoja de trabajo
-      const worksheet = XLSX.utils.json_to_sheet(datosExportar);
+      // Agregar los datos
+      rightTableData.forEach((item) => {
+        worksheet.addRow({
+          serial: item.serial,
+          estadoExcel: item.estadoExcel,
+          coincidencia:
+            item.coincidencia === "encontrado"
+              ? "Encontrado"
+              : item.coincidencia === "faltante"
+              ? "Faltante"
+              : "No Encontrado",
+          observacion: item.observacion || "",
+        });
+      });
 
-      // Agregar la hoja al workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Comparación");
+      // Estilizar la primera fila (encabezados)
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFE0E0E0" },
+      };
 
-      // Generar el archivo Excel
-      XLSX.writeFile(
-        workbook,
-        `inventario_comparacion_${new Date().toISOString().split("T")[0]}.xlsx`
-      );
+      // Generar el buffer del archivo Excel
+      const buffer = await workbook.xlsx.writeBuffer();
+
+      // Crear un blob y descargarlo
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `inventario_comparacion_${new Date().toISOString().split("T")[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error al exportar:", error);
       alert("Error al exportar el archivo. Por favor, intenta nuevamente.");
